@@ -1,4 +1,4 @@
-package com.oczeretko.dsbforsinket;
+package com.oczeretko.dsbforsinket.gcm;
 
 import android.app.*;
 import android.content.*;
@@ -11,6 +11,7 @@ import com.google.android.gms.iid.*;
 import com.google.common.util.concurrent.*;
 import com.microsoft.windowsazure.mobileservices.*;
 import com.microsoft.windowsazure.mobileservices.notifications.*;
+import com.oczeretko.dsbforsinket.*;
 
 import java.io.*;
 import java.net.*;
@@ -32,7 +33,7 @@ public class GcmRegistrationIntentService extends IntentService {
 
         try {
             InstanceID instanceID = InstanceID.getInstance(this);
-            String senderId = getString(R.string.gcm_defaultSenderId);
+            String senderId = getString(com.oczeretko.dsbforsinket.R.string.gcm_defaultSenderId);
             String token = instanceID.getToken(senderId, GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
             Log.d(TAG, "GCM Registration Token: " + token);
 

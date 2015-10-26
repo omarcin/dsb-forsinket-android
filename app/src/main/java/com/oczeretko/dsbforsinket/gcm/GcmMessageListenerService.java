@@ -1,4 +1,4 @@
-package com.oczeretko.dsbforsinket;
+package com.oczeretko.dsbforsinket.gcm;
 
 import android.app.*;
 import android.content.*;
@@ -9,6 +9,8 @@ import android.support.v4.app.*;
 import android.util.*;
 
 import com.google.android.gms.gcm.*;
+import com.oczeretko.dsbforsinket.R;
+import com.oczeretko.dsbforsinket.activity.*;
 
 public class GcmMessageListenerService extends GcmListenerService {
 

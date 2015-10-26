@@ -1,4 +1,4 @@
-package com.oczeretko.dsbforsinket;
+package com.oczeretko.dsbforsinket.activity;
 
 import android.content.*;
 import android.os.*;
@@ -8,6 +8,8 @@ import android.support.v7.app.*;
 import android.util.*;
 
 import com.google.android.gms.common.*;
+import com.oczeretko.dsbforsinket.*;
+import com.oczeretko.dsbforsinket.gcm.*;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -17,7 +19,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-            boolean sentToken = sharedPreferences.getBoolean(AppPreferences.SENT_TOKEN_TO_SERVER, false);
+            boolean sentToken = sharedPreferences.getBoolean(Consts.SENT_TOKEN_TO_SERVER, false);
             Log.d(TAG, "sentToken = " + sentToken);
         }
     };
@@ -38,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         LocalBroadcastManager.getInstance(this)
                              .registerReceiver(registrationBroadcastReceiver,
-                                               new IntentFilter(AppPreferences.REGISTRATION_COMPLETE));
+                                               new IntentFilter(Consts.REGISTRATION_COMPLETE));
     }
 
     @Override

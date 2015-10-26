@@ -1,4 +1,4 @@
-package com.oczeretko.dsbforsinket;
+package com.oczeretko.dsbforsinket.gcm;
 
 import android.content.*;
 

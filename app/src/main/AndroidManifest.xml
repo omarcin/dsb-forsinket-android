@@ -16,7 +16,7 @@
 
         <!-- Activities -->
 
-        <activity android:name=".MainActivity">
+        <activity android:name=".activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -26,12 +26,12 @@
         <!-- Services -->
 
         <service
-            android:name=".GcmRegistrationIntentService"
+            android:name=".gcm.GcmRegistrationIntentService"
             android:exported="false">
         </service>
 
         <service
-            android:name=".GcmInstanceIDListenerService"
+            android:name=".gcm.GcmInstanceIDListenerService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.android.gms.iid.InstanceID"/>
@@ -39,7 +39,7 @@
         </service>
 
         <service
-            android:name=".GcmMessageListenerService"
+            android:name=".gcm.GcmMessageListenerService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
