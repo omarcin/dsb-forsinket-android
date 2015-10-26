@@ -8,14 +8,19 @@ import android.util.*;
 
 import com.google.android.gms.gcm.*;
 import com.google.android.gms.iid.*;
+import com.google.common.util.concurrent.*;
 import com.microsoft.windowsazure.mobileservices.*;
+import com.microsoft.windowsazure.mobileservices.notifications.*;
 
 import java.io.*;
 import java.net.*;
+import java.util.concurrent.*;
 
 public class GcmRegistrationIntentService extends IntentService {
 
     private static final String TAG = "GcmRegIntentService";
+
+    private static final String[] REGISTRATION_TAGS = { "time-8:00", "station-8600856", "8600856-8:00" };
 
     public GcmRegistrationIntentService() {
         super(TAG);
@@ -34,7 +39,7 @@ public class GcmRegistrationIntentService extends IntentService {
             sendRegistrationToServer(token);
             sharedPreferences.edit().putBoolean(AppPreferences.SENT_TOKEN_TO_SERVER, true).apply();
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             Log.d(TAG, "Failed to complete token refresh", e);
             sharedPreferences.edit().putBoolean(AppPreferences.SENT_TOKEN_TO_SERVER, false).apply();
         }
@@ -43,10 +48,8 @@ public class GcmRegistrationIntentService extends IntentService {
         LocalBroadcastManager.getInstance(this).sendBroadcast(registrationComplete);
     }
 
-    private void sendRegistrationToServer(String token) throws MalformedURLException {
-        MobileServiceClient client = new MobileServiceClient("https://dsbforsinket.azure-mobile.net/",
-                                                             "zpHixUDmWfMvtyqSjnNSkxwxypDFKu50",
-                                                             this);
-        client.getPush().register(token, null);
+    private void sendRegistrationToServer(String token) throws ExecutionException, InterruptedException, MalformedURLException {
+        MobileServiceClient client = new MobileServiceClient(Consts.APP_URL, Consts.APP_KEY, this);
+        client.getPush().register(token, REGISTRATION_TAGS).get();
     }
 }
