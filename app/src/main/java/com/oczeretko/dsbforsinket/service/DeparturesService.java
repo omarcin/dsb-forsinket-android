@@ -46,8 +46,8 @@ public class DeparturesService extends IntentService {
         String station = intent.getStringExtra(KEY_STATION);
 
         try {
-            Thread.sleep(5000); // TODO: for testing
             ArrayList<DepartureInfo> departures = fetchDepartures(station);
+            Collections.sort(departures, (a, b) -> a.getDepartureTime().compareTo(b.getDepartureTime()));
             Bundle data = new Bundle();
             data.putParcelableArrayList(KEY_RESULT, departures);
             resultReceiver.send(RESULT_OK, data);

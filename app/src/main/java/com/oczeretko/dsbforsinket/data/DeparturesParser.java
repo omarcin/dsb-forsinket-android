@@ -18,8 +18,12 @@ public class DeparturesParser {
 
         ArrayList<DepartureInfo> list = new ArrayList<>();
         for (int i = 0; i < childNodes.getLength(); i++) {
-            list.add(this.processNode(childNodes.item(i)));
+            DepartureInfo departure = processNode(childNodes.item(i));
+            if (!departure.getDepartureTime().isEmpty()) {
+                list.add(departure);
+            }
         }
+
         return list;
     }
 
@@ -28,12 +32,12 @@ public class DeparturesParser {
         String departureTime = getDepartureTime(item);
         DepartureInfo departureInfo = new DepartureInfo(trainDestination, departureTime);
 
-        String isCancelled = this.getProperty(item, "d:Cancelled");
+        String isCancelled = getProperty(item, "d:Cancelled");
         if (!isCancelled.isEmpty()) {
             departureInfo.setCancelled(Boolean.parseBoolean(isCancelled));
         }
 
-        String delay = this.getProperty(item, "d:DepartureDelay");
+        String delay = getProperty(item, "d:DepartureDelay");
         if (!delay.isEmpty() && !delay.equals("0")) {
             Integer delayInMin = Integer.parseInt(delay) / 60;
             departureInfo.setDelay(delayInMin.toString());
@@ -44,8 +48,8 @@ public class DeparturesParser {
 
     private String getDepartureTime(Node item) throws ParseException {
         String departureTime = "";
-        String scheduledDeparture = this.getProperty(item, "d:ScheduledDeparture");
-        String minutesToDeparture = this.getProperty(item, "d:MinutesToDeparture");
+        String scheduledDeparture = getProperty(item, "d:ScheduledDeparture");
+        String minutesToDeparture = getProperty(item, "d:MinutesToDeparture");
         if (!scheduledDeparture.isEmpty()) {
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
             Date date = format.parse(scheduledDeparture);
@@ -62,10 +66,10 @@ public class DeparturesParser {
     }
 
     private String getDestination(Node item) {
-        String trainDestination = this.getProperty(item, "d:DestinationName");
-        String line = this.getProperty(item, "d:Line");
+        String trainDestination = getProperty(item, "d:DestinationName");
+        String line = getProperty(item, "d:Line");
         if (line != null && !line.isEmpty()) {
-            trainDestination += " (" + line + ")";
+            return line + " (" + trainDestination + ")";
         }
         return trainDestination;
     }
