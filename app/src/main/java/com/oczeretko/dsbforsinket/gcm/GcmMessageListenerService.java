@@ -6,6 +6,7 @@ import android.media.*;
 import android.net.*;
 import android.os.*;
 import android.support.v4.app.*;
+import android.support.v4.content.*;
 import android.util.*;
 
 import com.google.android.gms.gcm.*;
@@ -34,11 +35,12 @@ public class GcmMessageListenerService extends GcmListenerService {
 
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
-                                                             .setSmallIcon(R.mipmap.ic_launcher)
-                                                             .setContentTitle("GCM Message")
+                                                             .setSmallIcon(R.drawable.ic_notification)
+                                                             .setContentTitle(getString(R.string.app_name))
                                                              .setContentText(message)
                                                              .setAutoCancel(true)
                                                              .setSound(defaultSoundUri)
+                                                             .setColor(ContextCompat.getColor(this, R.color.colorAccent))
                                                              .setContentIntent(pendingIntent);
 
         NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
