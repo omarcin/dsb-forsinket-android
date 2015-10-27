@@ -6,13 +6,31 @@
     tools:context="com.oczeretko.dsbforsinket.fragment.DeparturesFragment"
     >
 
-    <ProgressBar
-        android:id="@+id/fragment_departures_progress_bar"
-        style="?android:progressBarStyle"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/fragment_departures_loading_indicator"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        />
+        android:orientation="vertical"
+        >
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:src="@drawable/train1_accent_sm"
+            android:layout_marginBottom="@dimen/default_margin"
+            />
+
+        <ProgressBar
+            android:id="@+id/fragment_departures_progress_bar"
+            style="?android:progressBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            />
+
+    </LinearLayout>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/fragment_departures_recycler"

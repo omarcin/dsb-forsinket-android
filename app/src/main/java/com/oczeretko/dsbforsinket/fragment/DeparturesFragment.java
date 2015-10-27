@@ -17,7 +17,7 @@ import java.util.*;
 
 public class DeparturesFragment extends Fragment {
 
-    private ProgressBar progressBar;
+    private View loadingIndicator;
     private RecyclerView recyclerView;
     private DeparturesAdapter adapter;
 
@@ -28,7 +28,7 @@ public class DeparturesFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_departures, container, false);
         recyclerView = (RecyclerView)view.findViewById(R.id.fragment_departures_recycler);
-        progressBar = (ProgressBar)view.findViewById(R.id.fragment_departures_progress_bar);
+        loadingIndicator = view.findViewById(R.id.fragment_departures_loading_indicator);
         setupRecyclerView();
         return view;
     }
@@ -45,7 +45,7 @@ public class DeparturesFragment extends Fragment {
             List<DepartureInfo> departures = StubData.getDepartures();
             adapter.setDepartures(departures);
             recyclerView.setVisibility(View.VISIBLE);
-            progressBar.setVisibility(View.GONE);
+            loadingIndicator.setVisibility(View.GONE);
         }, 5500);
     }
 
