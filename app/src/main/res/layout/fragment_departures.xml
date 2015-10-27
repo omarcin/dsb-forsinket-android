@@ -12,14 +12,15 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:orientation="vertical"
+        android:visibility="gone"
         >
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
+            android:layout_marginBottom="@dimen/big_margin"
             android:src="@drawable/train1_accent_sm"
-            android:layout_marginBottom="@dimen/default_margin"
             />
 
         <ProgressBar
@@ -27,6 +28,43 @@
             style="?android:progressBarStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/fragment_departures_error_indicator"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="vertical"
+        android:visibility="visible"
+        >
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginBottom="@dimen/big_margin"
+            android:src="@drawable/stop"
+            />
+
+        <TextView
+            android:id="@+id/fragment_departures_error_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="@string/error_text"
+            style="@style/error_text"
+            android:layout_marginBottom="@dimen/default_margin"
+            />
+
+        <Button
+            android:id="@+id/fragment_departures_retry"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/button_try_again"
             android:layout_gravity="center"
             />
 

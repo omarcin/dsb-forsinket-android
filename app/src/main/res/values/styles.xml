@@ -1,16 +1,16 @@
 <resources>
 
-    <!-- Base application theme. -->
+    <style name="AppTheme" parent="AppTheme.Base">
+    </style>
+
     <style name="AppTheme.Base" parent="Theme.AppCompat.Light.NoActionBar">
-        <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorControlHighlight">@color/colorAccent</item>
+        <item name="android:textColorPrimary">@color/primary_text_default_material_light</item>
 
         <item name="toolbarStyle">@style/AppThemeToolbar</item>
-    </style>
-
-    <style name="AppTheme" parent="AppTheme.Base">
     </style>
 
     <style name="AppThemeToolbar" parent="Widget.AppCompat.Toolbar">
@@ -20,7 +20,12 @@
 
     <style name="list_item_text">
         <item name="android:textSize">@dimen/abc_text_size_headline_material</item>
-        <item name="android:textColor">@color/primary_text_default_material_light</item>
+    </style>
+
+    <style name="error_text">
+        <item name="android:textSize">@dimen/abc_text_size_headline_material</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:gravity">center</item>
     </style>
 
 </resources>

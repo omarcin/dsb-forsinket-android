@@ -3,9 +3,9 @@
         <item
             android:id="@+id/drawer_departures"
             android:checked="true"
-            android:title="Departures" />
+            android:title="@string/drawer_departures" />
         <item
             android:id="@+id/drawer_settings"
-            android:title="Settings" />
+            android:title="@string/drawer_settings" />
     </group>
 </menu>

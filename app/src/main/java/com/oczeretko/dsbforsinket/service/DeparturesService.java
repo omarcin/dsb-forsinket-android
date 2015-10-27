@@ -20,7 +20,7 @@ public class DeparturesService extends IntentService {
 
     public final static int RESULT_OK = 1;
     public final static int RESULT_ERROR = -1;
-    private final static String KEY_RESULT = "Result";
+    public final static String KEY_RESULT = "Result";
 
     private final static String TAG = "DeparturesService";
     private final static String KEY_RECEIVER = "ResultReceiver";
@@ -32,8 +32,16 @@ public class DeparturesService extends IntentService {
         httpClient = new OkHttpClient();
     }
 
+    public static void requestData(Context context, ResultReceiver resultReceiver, String station){
+        Intent intent = new Intent(context, DeparturesService.class);
+        intent.putExtra(KEY_RECEIVER, resultReceiver);
+        intent.putExtra(KEY_STATION, station);
+        context.startService(intent);
+    }
+
     @Override
     protected void onHandleIntent(Intent intent) {
+        Log.d(TAG, "intent received");
         ResultReceiver resultReceiver = intent.getParcelableExtra(KEY_RECEIVER);
         String station = intent.getStringExtra(KEY_STATION);
 
