@@ -4,6 +4,8 @@ package com.oczeretko.dsbforsinket.fragment;
 import android.os.*;
 import android.support.v4.app.*;
 import android.support.v7.widget.*;
+import android.text.format.*;
+import android.util.*;
 import android.view.*;
 import android.widget.*;
 
@@ -17,18 +19,31 @@ import java.util.*;
 
 public class DeparturesFragment extends Fragment implements ResultReceiverListenable.ResultListener {
 
+    public static final long REFRESH_INTERVAL = DateUtils.MINUTE_IN_MILLIS;
+    private static final String TAG = "DeparturesFragment";
+
+    private View toolbarLoadingIndicator;
     private View loadingIndicator;
     private View errorIndicator;
     private Button retryButton;
     private RecyclerView recyclerView;
+
     private DeparturesAdapter adapter;
     private ResultReceiverListenable resultReceiver;
-    public static final String STATION = "8600856";
+
     private ArrayList<DepartureInfo> departures;
+    private long dataTimestamp;
+
+    private Handler refreshHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            Log.d(TAG, "refresh handler received message");
+            refreshData();
+        }
+    };
 
     public DeparturesFragment() {
     }
-
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -45,6 +60,7 @@ public class DeparturesFragment extends Fragment implements ResultReceiverListen
         errorIndicator = view.findViewById(R.id.fragment_departures_error_indicator);
         retryButton = (Button)view.findViewById(R.id.fragment_departures_retry);
         retryButton.setOnClickListener(_1 -> refreshData());
+        toolbarLoadingIndicator = getActivity().findViewById(R.id.main_activity_toolbar_progress_bar);
         setupRecyclerView();
         return view;
     }
@@ -63,7 +79,13 @@ public class DeparturesFragment extends Fragment implements ResultReceiverListen
         resultReceiver.setResultListener(this);
 
         if (departures != null) {
+            long dataAge = System.currentTimeMillis() - dataTimestamp;
             setData(departures);
+            if (dataAge > REFRESH_INTERVAL) {
+                refreshData();
+            } else {
+                scheduleRefresh();
+            }
         } else {
             // refreshData(); TODO: commented out for testing
         }
@@ -72,36 +94,56 @@ public class DeparturesFragment extends Fragment implements ResultReceiverListen
     @Override
     public void onPause() {
         super.onPause();
+        cancelRefresh();
         resultReceiver.setResultListener(null);
-    }
-
-    private void refreshData() {
-        recyclerView.setVisibility(View.GONE);
-        errorIndicator.setVisibility(View.GONE);
-        loadingIndicator.setVisibility(View.VISIBLE);
-        DeparturesService.requestData(getActivity(), resultReceiver, STATION);
-    }
-
-    private void setData(ArrayList<DepartureInfo> departures) {
-        this.departures = departures;
-        adapter.setDepartures(departures);
-        recyclerView.setVisibility(View.VISIBLE);
-        loadingIndicator.setVisibility(View.GONE);
-        errorIndicator.setVisibility(View.GONE);
     }
 
     @Override
     public void onReceiveResult(int resultCode, Bundle resultData) {
+        Log.d(TAG, "received result");
         switch (resultCode) {
             case DeparturesService.RESULT_OK:
                 ArrayList<DepartureInfo> receivedDepartures = resultData.getParcelableArrayList(DeparturesService.KEY_RESULT);
                 setData(receivedDepartures);
+                scheduleRefresh();
                 break;
             case DeparturesService.RESULT_ERROR:
+                departures = null;
                 recyclerView.setVisibility(View.GONE);
                 loadingIndicator.setVisibility(View.GONE);
+                toolbarLoadingIndicator.setVisibility(View.GONE);
                 errorIndicator.setVisibility(View.VISIBLE);
                 break;
         }
+    }
+
+    private void scheduleRefresh() {
+        refreshHandler.sendEmptyMessageDelayed(0, REFRESH_INTERVAL);
+    }
+
+    private void cancelRefresh() {
+        refreshHandler.removeMessages(0);
+    }
+
+    private void refreshData() {
+        DeparturesService.requestData(getActivity(), resultReceiver, Consts.STATION);
+        if (departures == null) {
+            recyclerView.setVisibility(View.GONE);
+            errorIndicator.setVisibility(View.GONE);
+            loadingIndicator.setVisibility(View.VISIBLE);
+            toolbarLoadingIndicator.setVisibility(View.GONE);
+        } else {
+            toolbarLoadingIndicator.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void setData(ArrayList<DepartureInfo> departures) {
+        this.departures = departures;
+        dataTimestamp = System.currentTimeMillis();
+        adapter.setDepartures(departures);
+        recyclerView.setVisibility(View.VISIBLE);
+        loadingIndicator.setVisibility(View.GONE);
+        toolbarLoadingIndicator.setVisibility(View.GONE);
+        errorIndicator.setVisibility(View.GONE);
     }
 }
