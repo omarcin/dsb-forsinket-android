@@ -17,9 +17,6 @@ import java.util.*;
 
 public class DeparturesFragment extends Fragment implements ResultReceiverListenable.ResultListener {
 
-    private static final String KEY_RECEIVER = "Receiver";
-    private static final String KEY_DEPARTURES = "Departures";
-
     private View loadingIndicator;
     private View errorIndicator;
     private Button retryButton;
@@ -32,17 +29,17 @@ public class DeparturesFragment extends Fragment implements ResultReceiverListen
     public DeparturesFragment() {
     }
 
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setRetainInstance(true);
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_departures, container, false);
-
-        if (savedInstanceState != null) {
-            resultReceiver = savedInstanceState.getParcelable(KEY_RECEIVER);
-            departures = savedInstanceState.getParcelableArrayList(KEY_DEPARTURES);
-        } else {
-            resultReceiver = new ResultReceiverListenable(new Handler());
-        }
-
+        resultReceiver = new ResultReceiverListenable(new Handler());
         recyclerView = (RecyclerView)view.findViewById(R.id.fragment_departures_recycler);
         loadingIndicator = view.findViewById(R.id.fragment_departures_loading_indicator);
         errorIndicator = view.findViewById(R.id.fragment_departures_error_indicator);
@@ -76,13 +73,6 @@ public class DeparturesFragment extends Fragment implements ResultReceiverListen
     public void onPause() {
         super.onPause();
         resultReceiver.setResultListener(null);
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        outState.putParcelable(KEY_RECEIVER, resultReceiver);
-        outState.putParcelableArrayList(KEY_DEPARTURES, departures);
-        super.onSaveInstanceState(outState);
     }
 
     private void refreshData() {

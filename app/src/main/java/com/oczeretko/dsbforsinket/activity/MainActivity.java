@@ -22,6 +22,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     private static final String TAG = "MainActivity";
+    private static final String TAG_FRAGMENT = "Fragment";
 
     private Toolbar toolbar;
     private DrawerLayout drawerLayout;
@@ -43,13 +44,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        if (checkPlayServices()) {
-            Intent intent = new Intent(this, GcmRegistrationIntentService.class);
-            startService(intent);
-        }
         findViews();
         setupViews();
-        showFragment(DeparturesFragment.class);
+
+        Fragment fragment = getSupportFragmentManager().findFragmentByTag(TAG_FRAGMENT);
+        if (fragment != null) {
+            currentFragmentClass = fragment.getClass();
+        } else {
+            if (checkPlayServices()) {
+                Intent intent = new Intent(this, GcmRegistrationIntentService.class);
+                startService(intent);
+            }
+            showFragment(DeparturesFragment.class);
+        }
     }
 
     private void findViews() {
@@ -142,7 +149,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         try {
             getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.main_activity_content, fragmentClass.newInstance())
+                .replace(R.id.main_activity_content, fragmentClass.newInstance(), TAG_FRAGMENT)
                 .commit();
             currentFragmentClass = fragmentClass;
         } catch (InstantiationException e) {
