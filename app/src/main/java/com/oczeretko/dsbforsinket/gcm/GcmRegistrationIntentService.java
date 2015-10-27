@@ -38,14 +38,14 @@ public class GcmRegistrationIntentService extends IntentService {
             Log.d(TAG, "GCM Registration Token: " + token);
 
             sendRegistrationToServer(token);
-            sharedPreferences.edit().putBoolean(AppPreferences.SENT_TOKEN_TO_SERVER, true).apply();
+            sharedPreferences.edit().putBoolean(Consts.SENT_TOKEN_TO_SERVER, true).apply();
 
         } catch (Exception e) {
             Log.d(TAG, "Failed to complete token refresh", e);
-            sharedPreferences.edit().putBoolean(AppPreferences.SENT_TOKEN_TO_SERVER, false).apply();
+            sharedPreferences.edit().putBoolean(Consts.SENT_TOKEN_TO_SERVER, false).apply();
         }
 
-        Intent registrationComplete = new Intent(AppPreferences.REGISTRATION_COMPLETE);
+        Intent registrationComplete = new Intent(Consts.REGISTRATION_COMPLETE);
         LocalBroadcastManager.getInstance(this).sendBroadcast(registrationComplete);
     }
 
