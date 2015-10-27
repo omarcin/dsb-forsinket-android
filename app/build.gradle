@@ -37,4 +37,5 @@ dependencies {
     compile 'com.google.android.gms:play-services-base:8.1.0'
     compile 'com.google.android.gms:play-services-gcm:8.1.0'
     compile 'com.microsoft.azure:azure-mobile-services-android-sdk:2.0.3'
+    compile 'com.squareup.okhttp:okhttp:2.5.0'
 }

@@ -1,6 +1,8 @@
 package com.oczeretko.dsbforsinket.data;
 
-public class DepartureInfo {
+import android.os.*;
+
+public class DepartureInfo implements Parcelable {
     private String trainName;
     private String departureTime;
     private String delay = "";
@@ -43,7 +45,39 @@ public class DepartureInfo {
         this.delay = delay;
     }
 
-    public boolean isDelayed(){
+    public boolean isDelayed() {
         return this.delay != "";
     }
+
+    protected DepartureInfo(Parcel in) {
+        trainName = in.readString();
+        departureTime = in.readString();
+        delay = in.readString();
+        cancelled = in.readByte() != 0x00;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(trainName);
+        dest.writeString(departureTime);
+        dest.writeString(delay);
+        dest.writeByte((byte)(cancelled ? 0x01 : 0x00));
+    }
+
+    public static final Parcelable.Creator<DepartureInfo> CREATOR = new Parcelable.Creator<DepartureInfo>() {
+        @Override
+        public DepartureInfo createFromParcel(Parcel in) {
+            return new DepartureInfo(in);
+        }
+
+        @Override
+        public DepartureInfo[] newArray(int size) {
+            return new DepartureInfo[size];
+        }
+    };
 }
