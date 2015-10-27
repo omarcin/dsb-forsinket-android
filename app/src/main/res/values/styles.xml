@@ -7,7 +7,6 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="colorControlHighlight">@color/colorAccent</item>
         <item name="android:textColorPrimary">@color/primary_text_default_material_light</item>
 
         <item name="toolbarStyle">@style/AppThemeToolbar</item>
