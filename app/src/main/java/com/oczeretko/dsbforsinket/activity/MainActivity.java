@@ -26,6 +26,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private ProgressBar toolbarLoadingIndicator;
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
+    private MenuItem menuItemDepartures;
 
     private Class<? extends Fragment> currentFragmentClass;
 
@@ -61,6 +62,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawerLayout = (DrawerLayout)findViewById(R.id.main_activity_drawer);
         navigationView = (NavigationView)findViewById(R.id.main_activity_navigation);
         toolbarLoadingIndicator = (ProgressBar) findViewById(R.id.main_activity_toolbar_progress_bar);
+        menuItemDepartures = navigationView.getMenu().findItem(R.id.drawer_departures);
     }
 
     private void setupViews() {
@@ -83,6 +85,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         LocalBroadcastManager.getInstance(this)
                              .unregisterReceiver(registrationBroadcastReceiver);
         super.onPause();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        showFragment(DeparturesFragment.class);
     }
 
     @Override
@@ -118,6 +126,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
+        } else if(currentFragmentClass == SettingsFragment.class) {
+            showFragment(DeparturesFragment.class);
+            menuItemDepartures.setChecked(true);
         } else {
             super.onBackPressed();
         }
