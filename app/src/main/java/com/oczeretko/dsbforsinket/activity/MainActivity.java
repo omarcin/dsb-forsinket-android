@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private CoordinatorLayout coordinatorLayout;
     private NavigationView navigationView;
     private MenuItem menuItemDepartures;
+    private Snackbar snackbar;
 
     private Class<? extends Fragment> currentFragmentClass;
 
@@ -61,7 +62,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         if (!checkSettingsVisited()) {
-            showIntroSnackbar();
+            showIntroSnackbarDelayed();
         }
     }
 
@@ -86,12 +87,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 .getBoolean(Consts.PREF_VISITED_SETTINGS, false);
     }
 
-    private void showIntroSnackbar() {
+    private void showIntroSnackbarDelayed() {
         int delay = getResources().getInteger(R.integer.snackbar_first_visit_delay_millis);
-        handler.postDelayed(() -> Snackbar.make(coordinatorLayout, R.string.snackbar_first_visit, Snackbar.LENGTH_INDEFINITE)
-                                          .setAction(R.string.snackbar_first_visit_action_settings, _1 -> showFragment(SettingsFragment.class))
-                                          .show(),
+        handler.postDelayed(() -> {
+                                snackbar = Snackbar.make(coordinatorLayout, R.string.snackbar_first_visit, Snackbar.LENGTH_INDEFINITE);
+                                snackbar.setAction(R.string.snackbar_first_visit_action_settings, _1 -> showFragment(SettingsFragment.class));
+                                snackbar.show();
+                            },
                             delay);
+    }
+
+    private void dismissSnackbarIfShown() {
+        if(snackbar != null){
+            snackbar.dismiss();
+            snackbar = null;
+        }
     }
 
     @Override
@@ -167,6 +177,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 .replace(R.id.main_activity_content, fragmentClass.newInstance(), TAG_FRAGMENT)
                 .commit();
             currentFragmentClass = fragmentClass;
+            dismissSnackbarIfShown();
         } catch (InstantiationException e) {
             Log.e(TAG, "", e);
         } catch (IllegalAccessException e) {
