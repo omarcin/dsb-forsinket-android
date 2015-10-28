@@ -3,6 +3,7 @@ package com.oczeretko.dsbforsinket.fragment;
 
 import android.content.*;
 import android.os.*;
+import android.support.v4.app.*;
 import android.support.v7.preference.*;
 import android.util.*;
 import android.view.*;
@@ -21,6 +22,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
     private ProgressBar toolbarLoadingIndicator;
     private String keyNotification;
     private String keyStation;
+    private String keyTimes;
 
     public SettingsFragment() {
     }
@@ -30,6 +32,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
         addPreferencesFromResource(R.xml.preferences);
         keyNotification = getString(R.string.preferences_notification_key);
         keyStation = getString(R.string.preferences_station_key);
+        keyTimes = getString(R.string.preferences_notification_times);
     }
 
     @Override
@@ -53,20 +56,38 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 
-        if (!key.equals(keyNotification) && !key.equals(keyStation)) {
+        if (!key.equals(keyNotification) && !key.equals(keyStation) && !key.equals(keyTimes)) {
             return;
         }
 
         if (sharedPreferences.getBoolean(keyNotification, false)) {
+
+            String[] times = sharedPreferences.getStringSet(keyTimes, Consts.TIMES_DEFAULT).toArray(new String[0]);
+
             if (checkPlayServices(true)) {
                 String station = sharedPreferences.getString(keyStation, Consts.STATION_DEFAULT);
-                GcmRegistrationIntentService.requestRegistration(getActivity(), station, Consts.TIMES_DEFAULT);
+                GcmRegistrationIntentService.requestRegistration(getActivity(), station, times);
                 toolbarLoadingIndicator.setVisibility(View.VISIBLE);
             }
         } else if (sharedPreferences.getBoolean(Consts.PREF_POSSIBLY_REGISTERED, false) && checkPlayServices(false)) {
             GcmRegistrationIntentService.requestDeregistration(getActivity());
             toolbarLoadingIndicator.setVisibility(View.VISIBLE);
         }
+    }
+
+    @Override
+    public void onDisplayPreferenceDialog(Preference preference) {
+
+        if (this.getFragmentManager().findFragmentByTag("android.support.v7.preference.PreferenceFragment.DIALOG") == null) {
+            if (preference instanceof MultiSelectListPreferenceCompat) {
+                DialogFragment f = MultiSelectListPreferenceDialogFragmentCompat.newInstance(preference.getKey());
+                f.setTargetFragment(this, 0);
+                f.show(this.getFragmentManager(), "android.support.v7.preference.PreferenceFragment.DIALOG");
+                return;
+            }
+        }
+
+        super.onDisplayPreferenceDialog(preference);
     }
 
     private boolean checkPlayServices(boolean showErrorDialog) {

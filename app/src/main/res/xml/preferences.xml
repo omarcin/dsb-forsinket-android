@@ -18,4 +18,14 @@
         android:defaultValue="false"
         />
 
+    <MultiSelectListPreferenceCompat
+        android:dependency="@string/preferences_notification_key"
+        android:entries="@array/times_names"
+        android:entryValues="@array/times_values"
+        android:key="@string/preferences_notification_times"
+        android:summary="@string/preferences_notification_times_summary"
+        android:title="@string/preferences_notification_times_title"
+        android:defaultValue="@array/times_default"
+        />
+
 </PreferenceScreen>
