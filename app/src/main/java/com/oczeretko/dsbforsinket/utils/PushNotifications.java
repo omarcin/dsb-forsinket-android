@@ -40,7 +40,7 @@ public final class PushNotifications {
         long snoozeTimeMillis = DateUtils.MINUTE_IN_MILLIS * snoozeTimeMinutes;
 
         long lastSnooze = PreferenceManager.getDefaultSharedPreferences(context)
-                                           .getLong(Consts.PREF_LAST_SNOOZE_MILLIS, System.currentTimeMillis());
+                                           .getLong(Consts.PREF_LAST_SNOOZE_MILLIS, 0);
         long sinceLastSnoozeMillis = System.currentTimeMillis() - lastSnooze;
         return sinceLastSnoozeMillis < snoozeTimeMillis;
     }
