@@ -19,4 +19,22 @@
     <string name="preferences_notification_times_title">Notification times</string>
     <string name="preferences_notification_times_summary">When do you want to get notifications</string>
 
+    <string name="notification_gcm_id"></string>
+    <string name="notification_gcm_content">Configuring push notifications.</string>
+
+    <string name="notification_delay_id"></string>
+
+    <string name="notification_delay_content_title_format"></string>
+
+    <plurals name="notification_delay_content_title_format">
+        <item quantity="zero">No Delayed Trains</item>
+        <item quantity="one">%1$s Delayed Train</item>
+        <item quantity="other">%1$s Delayed Trains</item>
+    </plurals>
+
+
+    <string name="notification_delay_line_format">&lt;b&gt;%1$s&lt;/b&gt;: %2$s min</string>
+
+    <string name="delimiter">,\u0020</string>
+
 </resources>

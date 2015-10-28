@@ -3,20 +3,20 @@ package com.oczeretko.dsbforsinket.gcm;
 import android.app.*;
 import android.content.*;
 import android.preference.*;
-import android.support.annotation.*;
+import android.support.v4.app.*;
 import android.support.v4.content.*;
 import android.util.*;
 
 import com.google.android.gms.gcm.*;
 import com.google.android.gms.iid.*;
-import com.microsoft.windowsazure.mobileservices.*;
 import com.oczeretko.dsbforsinket.*;
-
-import java.util.*;
+import com.oczeretko.dsbforsinket.R;
+import com.oczeretko.dsbforsinket.activity.*;
 
 public class GcmRegistrationIntentService extends IntentService {
 
     private static final String TAG = "GcmRegIntentService";
+    private static final int NOTIFICATION_ID = R.string.notification_gcm_id;
 
     private static final String KEY_STATION_ID = "stationid";
     private static final String KEY_TIMES = "times";
@@ -24,17 +24,7 @@ public class GcmRegistrationIntentService extends IntentService {
     private static final int ACTION_REGISTER = 1;
     private static final int ACTION_DEREGISTER = 2;
 
-    private static final String SEPARATOR = "-";
-    private static final String PREFIX_STATION = "station" + SEPARATOR;
-    private static final String PREFIX_TIME = "time" + SEPARATOR;
-
-    private static final String[] REGISTRATION_TAGS = {"time-8:00", "station-8600856", "8600856-8:00"};
-
     public static void requestRegistration(Context context, String station, String[] times) {
-        if (times.length == 0) {
-            return;
-        }
-
         Intent intent = new Intent(context, GcmRegistrationIntentService.class);
         intent.putExtra(KEY_STATION_ID, station);
         intent.putExtra(KEY_TIMES, times);
@@ -58,6 +48,8 @@ public class GcmRegistrationIntentService extends IntentService {
 
         int action = intent.getIntExtra(KEY_ACTION, ACTION_DEREGISTER);
 
+        startForeground(NOTIFICATION_ID, buildNotification());
+
         if (action == ACTION_REGISTER) {
             String station = intent.getStringExtra(KEY_STATION_ID);
             String[] times = intent.getStringArrayExtra(KEY_TIMES);
@@ -66,13 +58,13 @@ public class GcmRegistrationIntentService extends IntentService {
             deregister();
         }
 
+        stopForeground(true);
         Intent registrationComplete = new Intent(Consts.REGISTRATION_COMPLETE);
         LocalBroadcastManager.getInstance(this).sendBroadcast(registrationComplete);
     }
 
     private void register(String station, String[] times) {
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        String[] tags = createRegistrationTags(station, times);
 
         sharedPreferences.edit()
                          .putBoolean(Consts.PREF_POSSIBLY_REGISTERED, true)
@@ -83,8 +75,8 @@ public class GcmRegistrationIntentService extends IntentService {
             String token = instanceID.getToken(senderId, GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
             Log.d(TAG, "GCM Registration Token: " + token);
 
-            MobileServiceClient client = new MobileServiceClient(Consts.APP_URL, Consts.APP_KEY, this);
-            client.getPush().register(token, tags).get();
+            DsbMobileServiceClient client = new DsbMobileServiceClient(this);
+            client.register(token, station, times);
 
             sharedPreferences.edit().putBoolean(Consts.PREF_SENT_TOKEN_TO_SERVER, true).apply();
 
@@ -103,8 +95,8 @@ public class GcmRegistrationIntentService extends IntentService {
             String senderId = getString(com.oczeretko.dsbforsinket.R.string.gcm_defaultSenderId);
             instanceID.deleteToken(senderId, GoogleCloudMessaging.INSTANCE_ID_SCOPE);
 
-            MobileServiceClient client = new MobileServiceClient(Consts.APP_URL, Consts.APP_KEY, this);
-            client.getPush().unregister().get();
+            DsbMobileServiceClient client = new DsbMobileServiceClient(this);
+            client.unregister();
 
             sharedPreferences.edit()
                              .putBoolean(Consts.PREF_SENT_TOKEN_TO_SERVER, false)
@@ -117,14 +109,24 @@ public class GcmRegistrationIntentService extends IntentService {
         }
     }
 
-    @NonNull
-    private String[] createRegistrationTags(String station, String[] times) {
-        ArrayList<String> tagList = new ArrayList<>(2 * times.length + 1);
-        tagList.add(PREFIX_STATION + station);
-        for (String time : times) {
-            tagList.add(PREFIX_TIME + time);
-            tagList.add(station + SEPARATOR + time);
-        }
-        return tagList.toArray(new String[0]);
+    private Notification buildNotification() {
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        return new NotificationCompat.Builder(getApplicationContext())
+                   .setOngoing(true)
+                   .setCategory(Notification.CATEGORY_SERVICE)
+                   .setOnlyAlertOnce(true)
+                   .setColor(ContextCompat.getColor(this, R.color.colorPrimary))
+                   .setSmallIcon(getNotificationIcon())
+                   .setContentTitle(getString(R.string.app_name))
+                   .setContentText(getString(R.string.notification_gcm_content))
+                   .setContentIntent(pendingIntent)
+                   .build();
+    }
+
+    private int getNotificationIcon() {
+        boolean whiteIcon = (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP);
+        return whiteIcon ? R.drawable.ic_notification : R.mipmap.ic_launcher;
     }
 }
