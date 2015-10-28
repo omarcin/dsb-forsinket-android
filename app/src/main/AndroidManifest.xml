@@ -1,14 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest
-    package="com.oczeretko.dsbforsinket"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest package="com.oczeretko.dsbforsinket"
+          xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
 
     <application
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
@@ -21,6 +20,7 @@
             android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
+
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
@@ -31,12 +31,10 @@
             android:name=".service.DeparturesService"
             android:exported="false">
         </service>
-
         <service
             android:name=".gcm.GcmRegistrationIntentService"
             android:exported="false">
         </service>
-
         <service
             android:name=".gcm.GcmInstanceIDListenerService"
             android:exported="false">
@@ -44,7 +42,6 @@
                 <action android:name="com.google.android.gms.iid.InstanceID"/>
             </intent-filter>
         </service>
-
         <service
             android:name=".gcm.GcmMessageListenerService"
             android:exported="false">
@@ -61,7 +58,16 @@
             android:permission="com.google.android.c2dm.permission.SEND">
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
+
                 <category android:name="com.oczeretko.dsbforsinket"/>
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".receiver.NotificationActionReceiver"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="com.oczeretko.dsbforsinket.receiver.ACTION_SNOOZE"/>
             </intent-filter>
         </receiver>
 

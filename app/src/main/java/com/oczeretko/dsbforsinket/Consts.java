@@ -14,6 +14,8 @@ public final class Consts {
 
     public static final String PREF_SENT_TOKEN_TO_SERVER = "SENT_TOKEN";
     public static final String PREF_POSSIBLY_REGISTERED = "REGISTERED_MAYBE";
+    public static final String PREF_LAST_SNOOZE_MILLIS = "SNOOZE";
+    public static final String PREF_VISITED_SETTINGS = "VISITED_SETTINGS";
 
     {
         TIMES_DEFAULT.add("8:00");

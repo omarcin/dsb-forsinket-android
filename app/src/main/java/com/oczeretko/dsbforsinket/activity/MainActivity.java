@@ -2,19 +2,20 @@ package com.oczeretko.dsbforsinket.activity;
 
 import android.content.*;
 import android.os.*;
-import android.preference.*;
 import android.support.design.widget.*;
 import android.support.v4.app.*;
 import android.support.v4.content.*;
 import android.support.v4.view.*;
 import android.support.v4.widget.*;
 import android.support.v7.app.*;
+import android.support.v7.preference.*;
 import android.support.v7.widget.Toolbar;
 import android.util.*;
 import android.view.*;
 import android.widget.*;
 
 import com.oczeretko.dsbforsinket.*;
+import com.oczeretko.dsbforsinket.R;
 import com.oczeretko.dsbforsinket.fragment.*;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
@@ -22,9 +23,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private static final String TAG = "MainActivity";
     private static final String TAG_FRAGMENT = "Fragment";
 
+    private Handler handler = new Handler();
+
     private Toolbar toolbar;
     private ProgressBar toolbarLoadingIndicator;
     private DrawerLayout drawerLayout;
+    private CoordinatorLayout coordinatorLayout;
     private NavigationView navigationView;
     private MenuItem menuItemDepartures;
 
@@ -55,14 +59,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else {
             showFragment(DeparturesFragment.class);
         }
+
+        if (!checkSettingsVisited()) {
+            showIntroSnackbar();
+        }
     }
 
     private void findViews() {
         toolbar = (Toolbar)findViewById(R.id.main_activity_toolbar);
         drawerLayout = (DrawerLayout)findViewById(R.id.main_activity_drawer);
         navigationView = (NavigationView)findViewById(R.id.main_activity_navigation);
-        toolbarLoadingIndicator = (ProgressBar) findViewById(R.id.main_activity_toolbar_progress_bar);
+        toolbarLoadingIndicator = (ProgressBar)findViewById(R.id.main_activity_toolbar_progress_bar);
         menuItemDepartures = navigationView.getMenu().findItem(R.id.drawer_departures);
+        coordinatorLayout = (CoordinatorLayout)findViewById(R.id.main_activity_coordinator);
     }
 
     private void setupViews() {
@@ -70,6 +79,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp);
         navigationView.setNavigationItemSelectedListener(this);
+    }
+
+    private boolean checkSettingsVisited() {
+        return PreferenceManager.getDefaultSharedPreferences(this)
+                                .getBoolean(Consts.PREF_VISITED_SETTINGS, false);
+    }
+
+    private void showIntroSnackbar() {
+        int delay = getResources().getInteger(R.integer.snackbar_first_visit_delay_millis);
+        handler.postDelayed(() -> Snackbar.make(coordinatorLayout, R.string.snackbar_first_visit, Snackbar.LENGTH_INDEFINITE)
+                                          .setAction(R.string.snackbar_first_visit_action_settings, _1 -> showFragment(SettingsFragment.class))
+                                          .show(),
+                            delay);
     }
 
     @Override
@@ -126,7 +148,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
-        } else if(currentFragmentClass == SettingsFragment.class) {
+        } else if (currentFragmentClass == SettingsFragment.class) {
             showFragment(DeparturesFragment.class);
             menuItemDepartures.setChecked(true);
         } else {

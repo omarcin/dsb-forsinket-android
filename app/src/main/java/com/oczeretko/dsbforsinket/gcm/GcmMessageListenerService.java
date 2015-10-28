@@ -11,20 +11,25 @@ import android.text.*;
 import android.util.*;
 
 import com.google.android.gms.gcm.*;
-import com.oczeretko.dsbforsinket.*;
 import com.oczeretko.dsbforsinket.R;
 import com.oczeretko.dsbforsinket.activity.*;
+import com.oczeretko.dsbforsinket.utils.*;
 
 import java.util.*;
 
 public class GcmMessageListenerService extends GcmListenerService {
 
     private static final String TAG = "GcmMessageListenerServ";
-    private static final int NOTIFICATION_ID = R.string.notification_delay_id;
 
     @Override
     public void onMessageReceived(String from, Bundle data) {
         Log.d(TAG, "From: " + from);
+
+        if (PushNotifications.isSnoozed(this)) {
+            Log.d(TAG, "Snoozed");
+            return;
+        }
+
         PushMessage message = PushMessage.newFromBundle(data);
         sendNotification(message);
     }
@@ -55,7 +60,10 @@ public class GcmMessageListenerService extends GcmListenerService {
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)
                 .setColor(ContextCompat.getColor(this, R.color.colorAccent))
-                .setContentIntent(pendingIntent);
+                .setContentIntent(pendingIntent)
+                .addAction(R.drawable.ic_alarm_off_grey600_24dp,
+                           getString(R.string.notification_delay_stop),
+                           PushNotifications.getSnoozeIntent(this));
 
         NotificationCompat.InboxStyle inboxStyle =
             new NotificationCompat.InboxStyle().setBigContentTitle(title);
@@ -68,9 +76,7 @@ public class GcmMessageListenerService extends GcmListenerService {
         }
 
         notificationBuilder.setStyle(inboxStyle);
-
-        NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
+        PushNotifications.notify(this, notificationBuilder.build());
     }
 
     private int getNotificationIcon() {

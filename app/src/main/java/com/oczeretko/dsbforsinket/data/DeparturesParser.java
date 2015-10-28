@@ -28,10 +28,11 @@ public class DeparturesParser {
     }
 
     private DepartureInfo processNode(Node item) throws ParseException {
-        String trainDestination = getDestination(item);
+        String trainDestination = getProperty(item, "d:DestinationName");
         String departureTime = getDepartureTime(item);
         DepartureInfo departureInfo = new DepartureInfo(trainDestination, departureTime);
 
+        departureInfo.setTrainLine(getProperty(item, "d:Line"));
         String isCancelled = getProperty(item, "d:Cancelled");
         if (!isCancelled.isEmpty()) {
             departureInfo.setCancelled(Boolean.parseBoolean(isCancelled));
@@ -65,16 +66,8 @@ public class DeparturesParser {
         return departureTime;
     }
 
-    private String getDestination(Node item) {
-        String trainDestination = getProperty(item, "d:DestinationName");
-        String line = getProperty(item, "d:Line");
-        if (line != null && !line.isEmpty()) {
-            return line + " (" + trainDestination + ")";
-        }
-        return trainDestination;
-    }
-
     private String getProperty(Node item, String propertyName) {
-        return ((Element)item).getElementsByTagName(propertyName).item(0).getTextContent();
+        String textContent = ((Element)item).getElementsByTagName(propertyName).item(0).getTextContent();
+        return textContent != null ? textContent : "";
     }
 }

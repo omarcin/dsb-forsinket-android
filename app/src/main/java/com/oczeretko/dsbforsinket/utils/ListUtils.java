@@ -1,4 +1,4 @@
-package com.oczeretko.dsbforsinket;
+package com.oczeretko.dsbforsinket.utils;
 
 import java.util.*;
 

@@ -7,6 +7,7 @@ public class DepartureInfo implements Parcelable {
     private String departureTime;
     private String delay = "";
     private boolean cancelled;
+    private String trainLine;
 
     public DepartureInfo(String trainName, String departureTime) {
         this.trainName = trainName;
@@ -19,6 +20,14 @@ public class DepartureInfo implements Parcelable {
 
     public void setTrainName(String trainName) {
         this.trainName = trainName;
+    }
+
+    public String getTrainLine() {
+        return trainLine;
+    }
+
+    public void setTrainLine(String trainLine) {
+        this.trainLine = trainLine;
     }
 
     public String getDepartureTime() {
@@ -51,6 +60,7 @@ public class DepartureInfo implements Parcelable {
 
     protected DepartureInfo(Parcel in) {
         trainName = in.readString();
+        trainLine = in.readString();
         departureTime = in.readString();
         delay = in.readString();
         cancelled = in.readByte() != 0x00;
@@ -64,6 +74,7 @@ public class DepartureInfo implements Parcelable {
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(trainName);
+        dest.writeString(trainLine);
         dest.writeString(departureTime);
         dest.writeString(delay);
         dest.writeByte((byte)(cancelled ? 0x01 : 0x00));
