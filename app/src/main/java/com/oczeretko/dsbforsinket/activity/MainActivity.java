@@ -124,7 +124,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 menuItem.setChecked(true);
                 return true;
             case R.id.drawer_settings:
-                showFragment(DeparturesFragment.class);
+                showFragment(SettingsFragment.class);
                 menuItem.setChecked(true);
                 return true;
             default:

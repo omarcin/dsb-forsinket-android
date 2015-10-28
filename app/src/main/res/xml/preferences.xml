@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ListPreference
+        android:key="@string/preferences_station_key"
+        android:title="@string/preferences_station_title"
+        android:summary="%s"
+        android:dialogTitle="@string/preferences_station_title"
+        android:entries="@array/stations_names"
+        android:entryValues="@array/stations_uics"
+        android:defaultValue="8600626"
+        />
+
+    <CheckBoxPreference
+        android:key="@string/preferences_notification_key"
+        android:title="@string/preferences_notification_title"
+        android:summary="@string/preferences_notification_summary"
+        android:defaultValue="true"
+        android:enabled="false"
+        />
+
+</PreferenceScreen>

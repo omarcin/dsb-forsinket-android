@@ -1,7 +1,9 @@
 package com.oczeretko.dsbforsinket.fragment;
 
 
+import android.content.*;
 import android.os.*;
+import android.preference.*;
 import android.support.v4.app.*;
 import android.support.v7.widget.*;
 import android.text.format.*;
@@ -31,8 +33,11 @@ public class DeparturesFragment extends Fragment implements ResultReceiverListen
     private DeparturesAdapter adapter;
     private ResultReceiverListenable resultReceiver;
 
+    private String station;
+
     private ArrayList<DepartureInfo> departures;
-    private long dataTimestamp;
+    private long departuresTimestamp;
+    private String departuresStation;
 
     private Handler refreshHandler = new Handler() {
         @Override
@@ -78,8 +83,11 @@ public class DeparturesFragment extends Fragment implements ResultReceiverListen
         super.onResume();
         resultReceiver.setResultListener(this);
 
-        if (departures != null) {
-            long dataAge = System.currentTimeMillis() - dataTimestamp;
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        station = preferences.getString(getString(R.string.preferences_station_key), Consts.STATION_DEFAULT);
+
+        if (departures != null && station.equals(departuresStation)) {
+            long dataAge = System.currentTimeMillis() - departuresTimestamp;
             setData(departures);
             if (dataAge > REFRESH_INTERVAL) {
                 refreshData();
@@ -126,7 +134,7 @@ public class DeparturesFragment extends Fragment implements ResultReceiverListen
     }
 
     private void refreshData() {
-        DeparturesService.requestData(getActivity(), resultReceiver, Consts.STATION);
+        DeparturesService.requestData(getActivity(), resultReceiver, Consts.STATION_DEFAULT);
         if (departures == null) {
             recyclerView.setVisibility(View.GONE);
             errorIndicator.setVisibility(View.GONE);
@@ -139,7 +147,8 @@ public class DeparturesFragment extends Fragment implements ResultReceiverListen
 
     private void setData(ArrayList<DepartureInfo> departures) {
         this.departures = departures;
-        dataTimestamp = System.currentTimeMillis();
+        departuresTimestamp = System.currentTimeMillis();
+        departuresStation = station;
         adapter.setDepartures(departures);
         recyclerView.setVisibility(View.VISIBLE);
         loadingIndicator.setVisibility(View.GONE);
