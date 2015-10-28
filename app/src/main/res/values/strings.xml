@@ -34,7 +34,7 @@
     <string name="notification_delay_line_format">&lt;b&gt;%1$s&lt;/b&gt;: %2$s min</string>
 
     <string name="delimiter">,\u0020</string>
-    <string name="snackbar_first_visit">Central station departures</string>
+    <string name="snackbar_first_visit">København H departures</string>
     <string name="snackbar_first_visit_action_settings">Settings</string>
 
 </resources>
