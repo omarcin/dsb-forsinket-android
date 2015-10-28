@@ -95,7 +95,7 @@ public class DeparturesFragment extends Fragment implements ResultReceiverListen
                 scheduleRefresh();
             }
         } else {
-            // refreshData(); TODO: commented out for testing
+            refreshData(); // TODO: comment out to test
         }
     }
 
@@ -134,7 +134,7 @@ public class DeparturesFragment extends Fragment implements ResultReceiverListen
     }
 
     private void refreshData() {
-        DeparturesService.requestData(getActivity(), resultReceiver, Consts.STATION_DEFAULT);
+        DeparturesService.requestData(getActivity(), resultReceiver, station);
         if (departures == null) {
             recyclerView.setVisibility(View.GONE);
             errorIndicator.setVisibility(View.GONE);

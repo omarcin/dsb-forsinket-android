@@ -15,8 +15,7 @@
         android:key="@string/preferences_notification_key"
         android:title="@string/preferences_notification_title"
         android:summary="@string/preferences_notification_summary"
-        android:defaultValue="true"
-        android:enabled="false"
+        android:defaultValue="false"
         />
 
 </PreferenceScreen>
