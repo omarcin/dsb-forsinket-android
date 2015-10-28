@@ -3,23 +3,23 @@ package com.oczeretko.dsbforsinket.data;
 import android.os.*;
 
 public class DepartureInfo implements Parcelable {
-    private String trainName;
+    private String destinationName;
     private String departureTime;
     private String delay = "";
     private boolean cancelled;
     private String trainLine;
 
-    public DepartureInfo(String trainName, String departureTime) {
-        this.trainName = trainName;
+    public DepartureInfo(String destinationName, String departureTime) {
+        this.destinationName = destinationName;
         this.departureTime = departureTime;
     }
 
-    public String getTrainName() {
-        return trainName;
+    public String getDestinationName() {
+        return destinationName;
     }
 
-    public void setTrainName(String trainName) {
-        this.trainName = trainName;
+    public void setDestinationName(String destinationName) {
+        this.destinationName = destinationName;
     }
 
     public String getTrainLine() {
@@ -59,7 +59,7 @@ public class DepartureInfo implements Parcelable {
     }
 
     protected DepartureInfo(Parcel in) {
-        trainName = in.readString();
+        destinationName = in.readString();
         trainLine = in.readString();
         departureTime = in.readString();
         delay = in.readString();
@@ -73,7 +73,7 @@ public class DepartureInfo implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(trainName);
+        dest.writeString(destinationName);
         dest.writeString(trainLine);
         dest.writeString(departureTime);
         dest.writeString(delay);

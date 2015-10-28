@@ -2,9 +2,8 @@
 <resources>
 
     <string-array name="times_names">
-        <item>20:45 - 20:00</item>
-        <item>21:15 - 21:30</item>
-        <item>21:00 - 21:15</item>
+        <item>23:15 - 23:30</item>
+        <item>23:30 - 23:45</item>
 
         <item>06:00 - 06:15</item>
         <item>06:15 - 06:30</item>
@@ -29,9 +28,8 @@
     </string-array>
 
     <string-array name="times_values">
-        <item>20:45</item>
-        <item>21:00</item>
-        <item>21:15</item>
+        <item>23:15</item>
+        <item>23:30</item>
 
         <item>6:00</item>
         <item>6:15</item>

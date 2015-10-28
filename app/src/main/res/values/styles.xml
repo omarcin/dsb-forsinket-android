@@ -20,7 +20,11 @@
     </style>
 
     <style name="list_item_text">
-        <item name="android:textSize">@dimen/abc_text_size_headline_material</item>
+        <item name="android:textSize">@dimen/departures_font_size</item>
+    </style>
+
+    <style name="list_item_text_light" parent="list_item_text">
+        <item name="android:textColor">@color/primary_text_default_material_dark</item>
     </style>
 
     <style name="error_text">
