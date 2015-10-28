@@ -4,4 +4,12 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
     <color name="colorOddRow">#223F51B5</color>
+
+    <color name="line_a">#7700B6E3</color>
+    <color name="line_b">#773CB94E</color>
+    <color name="line_c">#77FC873D</color>
+    <color name="line_e">#778170A1</color>
+    <color name="line_f">#77FFC142</color>
+    <color name="line_h">#77FB002B</color>
+    <color name="line_train">#AAAAAA</color>
 </resources>
