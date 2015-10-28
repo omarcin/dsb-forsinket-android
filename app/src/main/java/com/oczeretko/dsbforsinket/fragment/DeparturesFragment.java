@@ -104,6 +104,7 @@ public class DeparturesFragment extends Fragment implements ResultReceiverListen
         super.onPause();
         cancelRefresh();
         resultReceiver.setResultListener(null);
+        loadingIndicator.setVisibility(View.GONE);
     }
 
     @Override
