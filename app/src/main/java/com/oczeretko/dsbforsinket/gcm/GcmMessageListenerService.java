@@ -53,6 +53,7 @@ public class GcmMessageListenerService extends GcmListenerService {
         NotificationCompat.Builder notificationBuilder =
             new NotificationCompat.Builder(this)
                 .setCategory(Notification.CATEGORY_MESSAGE)
+                .setVisibility(Notification.VISIBILITY_PUBLIC)
                 .setPriority(Notification.PRIORITY_HIGH)
                 .setSmallIcon(getNotificationIcon())
                 .setContentTitle(title)
