@@ -23,7 +23,7 @@
     <string name="notification_gcm_content">Configuring push notifications.</string>
 
     <string name="notification_delay_id"></string>
-    <string name="notification_delay_stop">Silence for 60 min</string>
+    <string name="notification_delay_stop">Disable for 60 min</string>
 
     <plurals name="notification_delay_content_title_format">
         <item quantity="zero">No Delayed Trains</item>
