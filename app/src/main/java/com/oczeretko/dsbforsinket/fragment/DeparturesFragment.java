@@ -18,6 +18,8 @@ import com.oczeretko.dsbforsinket.service.*;
 
 import java.util.*;
 
+import static com.oczeretko.dsbforsinket.utils.HandlerUtils.toHandlerCallback;
+
 
 public class DeparturesFragment extends Fragment implements ResultReceiverListenable.ResultListener {
 
@@ -39,13 +41,7 @@ public class DeparturesFragment extends Fragment implements ResultReceiverListen
     private long departuresTimestamp;
     private String departuresStation;
 
-    private Handler refreshHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            Log.d(TAG, "refresh handler received message");
-            refreshData();
-        }
-    };
+    private Handler refreshHandler = new Handler(toHandlerCallback(this::refreshData));
 
     public DeparturesFragment() {
     }
