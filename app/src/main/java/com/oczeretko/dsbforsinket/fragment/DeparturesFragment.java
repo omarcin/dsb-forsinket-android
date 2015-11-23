@@ -5,6 +5,7 @@ import android.content.*;
 import android.os.*;
 import android.preference.*;
 import android.support.v4.app.*;
+import android.support.v7.app.*;
 import android.support.v7.widget.*;
 import android.text.format.*;
 import android.util.*;
@@ -15,10 +16,13 @@ import com.oczeretko.dsbforsinket.*;
 import com.oczeretko.dsbforsinket.adapter.*;
 import com.oczeretko.dsbforsinket.data.*;
 import com.oczeretko.dsbforsinket.service.*;
+import com.oczeretko.dsbforsinket.utils.*;
 
 import java.util.*;
 
 import static com.oczeretko.dsbforsinket.utils.HandlerUtils.toHandlerCallback;
+import static com.oczeretko.dsbforsinket.utils.ListUtils.first;
+import static com.oczeretko.dsbforsinket.utils.ListUtils.zip;
 
 
 public class DeparturesFragment extends Fragment implements ResultReceiverListenable.ResultListener {
@@ -42,9 +46,6 @@ public class DeparturesFragment extends Fragment implements ResultReceiverListen
     private String departuresStation;
 
     private Handler refreshHandler = new Handler(toHandlerCallback(this::refreshData));
-
-    public DeparturesFragment() {
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -78,9 +79,9 @@ public class DeparturesFragment extends Fragment implements ResultReceiverListen
     public void onResume() {
         super.onResume();
         resultReceiver.setResultListener(this);
-
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         station = preferences.getString(getString(R.string.preferences_station_key), Consts.STATION_DEFAULT);
+        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(Stations.getStationNameById(getContext(), station));
 
         if (departures != null && station.equals(departuresStation)) {
             long dataAge = System.currentTimeMillis() - departuresTimestamp;
@@ -91,7 +92,7 @@ public class DeparturesFragment extends Fragment implements ResultReceiverListen
                 scheduleRefresh();
             }
         } else {
-            refreshData(); // TODO: comment out to test
+            refreshData();
         }
     }
 

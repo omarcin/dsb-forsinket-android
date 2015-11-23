@@ -4,8 +4,8 @@ package com.oczeretko.dsbforsinket.fragment;
 import android.content.*;
 import android.os.*;
 import android.support.v4.app.*;
+import android.support.v7.app.*;
 import android.support.v7.preference.*;
-import android.support.v7.preference.Preference;
 import android.util.*;
 import android.view.*;
 import android.widget.*;
@@ -45,11 +45,12 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
     @Override
     public void onResume() {
         super.onResume();
+        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(R.string.app_name);
         getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
         android.preference.PreferenceManager.getDefaultSharedPreferences(getActivity())
-            .edit()
-            .putBoolean(Consts.PREF_VISITED_SETTINGS, true)
-            .commit();
+                                            .edit()
+                                            .putBoolean(Consts.PREF_VISITED_SETTINGS, true)
+                                            .commit();
     }
 
     @Override
