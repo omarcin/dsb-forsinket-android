@@ -17,11 +17,13 @@ import android.widget.*;
 import com.oczeretko.dsbforsinket.*;
 import com.oczeretko.dsbforsinket.R;
 import com.oczeretko.dsbforsinket.fragment.*;
+import com.oczeretko.dsbforsinket.receivers.*;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String TAG = "MainActivity";
     private static final String TAG_FRAGMENT = "Fragment";
+    public static final String EXTRA_SHOW_SETTINGS = "show_settings";
 
     private Handler handler = new Handler();
 
@@ -35,15 +37,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private Class<? extends Fragment> currentFragmentClass;
 
-    private BroadcastReceiver registrationBroadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-            boolean sentToken = sharedPreferences.getBoolean(Consts.PREF_SENT_TOKEN_TO_SERVER, false);
-            toolbarLoadingIndicator.setVisibility(View.GONE);
-            Log.d(TAG, "sentToken = " + sentToken);
-        }
-    };
+    private BroadcastReceiver registrationBroadcastReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +49,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setupViews();
 
         Fragment fragment = getSupportFragmentManager().findFragmentByTag(TAG_FRAGMENT);
-        if (fragment != null) {
+
+        if (getIntent().getBooleanExtra(EXTRA_SHOW_SETTINGS, false)) {
+            showFragment(SettingsFragment.class);
+        } else if (fragment != null) {
             currentFragmentClass = fragment.getClass();
         } else {
             showFragment(DeparturesFragment.class);
@@ -89,16 +86,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void showIntroSnackbarDelayed() {
         int delay = getResources().getInteger(R.integer.snackbar_first_visit_delay_millis);
-        handler.postDelayed(() -> {
-                                snackbar = Snackbar.make(coordinatorLayout, R.string.snackbar_first_visit, Snackbar.LENGTH_INDEFINITE);
-                                snackbar.setAction(R.string.snackbar_first_visit_action_settings, _1 -> showFragment(SettingsFragment.class));
-                                snackbar.show();
-                            },
-                            delay);
+        handler.postDelayed(this::showIntroStackbar, delay);
+    }
+
+    private void showIntroStackbar() {
+        snackbar = Snackbar.make(coordinatorLayout, R.string.snackbar_first_visit, Snackbar.LENGTH_INDEFINITE);
+        snackbar.setAction(R.string.snackbar_first_visit_action_settings, _1 -> showFragment(SettingsFragment.class));
+        snackbar.show();
     }
 
     private void dismissSnackbarIfShown() {
-        if(snackbar != null){
+        handler.removeCallbacksAndMessages(null);
+        if (snackbar != null) {
             snackbar.dismiss();
             snackbar = null;
         }
@@ -107,22 +106,28 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onResume() {
         super.onResume();
+        registrationBroadcastReceiver = new RegistrationBroadcastReceiver(toolbarLoadingIndicator);
         LocalBroadcastManager.getInstance(this)
                              .registerReceiver(registrationBroadcastReceiver,
-                                               new IntentFilter(Consts.REGISTRATION_COMPLETE));
+                                               new IntentFilter(Consts.INTENT_ACTION_REGISTRATION_UPDATE));
     }
 
     @Override
     protected void onPause() {
         LocalBroadcastManager.getInstance(this)
                              .unregisterReceiver(registrationBroadcastReceiver);
+        registrationBroadcastReceiver = null;
         super.onPause();
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        showFragment(DeparturesFragment.class);
+        if (intent.getBooleanExtra(EXTRA_SHOW_SETTINGS, false)) {
+            showFragment(SettingsFragment.class);
+        } else {
+            showFragment(DeparturesFragment.class);
+        }
     }
 
     @Override

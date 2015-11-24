@@ -14,6 +14,7 @@ import com.google.android.gms.common.*;
 import com.oczeretko.dsbforsinket.*;
 import com.oczeretko.dsbforsinket.R;
 import com.oczeretko.dsbforsinket.gcm.*;
+import com.oczeretko.dsbforsinket.utils.*;
 
 public class SettingsFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -63,6 +64,13 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 
         if (!key.equals(keyNotification) && !key.equals(keyStation) && !key.equals(keyTimes)) {
+            return;
+        }
+
+        if (sharedPreferences.getBoolean(Consts.PREF_UNHANDLED_REGISTRATION_ERROR, false)) {
+            // TODO: clean up
+            CheckBoxPreference cbp = (CheckBoxPreference)findPreference(getString(R.string.preferences_notification_key));
+            cbp.setChecked(sharedPreferences.getBoolean(keyNotification, false));
             return;
         }
 

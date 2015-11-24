@@ -21,6 +21,8 @@
 
     <string name="notification_gcm_id"></string>
     <string name="notification_gcm_content">Configuring push notifications.</string>
+    <string name="notification_gcm_failure_id"></string>
+    <string name="notification_gcm_failure_content">Failed to configure push notifications.</string>
 
     <string name="notification_delay_id"></string>
     <string name="notification_delay_stop">Disable for 60 min</string>

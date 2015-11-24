@@ -2,6 +2,8 @@ package com.oczeretko.dsbforsinket.gcm;
 
 import android.app.*;
 import android.content.*;
+import android.media.*;
+import android.net.*;
 import android.preference.*;
 import android.support.v4.app.*;
 import android.support.v4.content.*;
@@ -12,17 +14,24 @@ import com.google.android.gms.iid.*;
 import com.oczeretko.dsbforsinket.*;
 import com.oczeretko.dsbforsinket.R;
 import com.oczeretko.dsbforsinket.activity.*;
+import com.oczeretko.dsbforsinket.receivers.*;
+import com.oczeretko.dsbforsinket.utils.*;
 
 public class GcmRegistrationIntentService extends IntentService {
 
     private static final String TAG = "GcmRegIntentService";
     private static final int NOTIFICATION_ID = R.string.notification_gcm_id;
+    private static final int NOTIFICATION_FAILURE_ID = R.string.notification_gcm_failure_id;
 
     private static final String KEY_STATION_ID = "stationid";
     private static final String KEY_TIMES = "times";
     private static final String KEY_ACTION = "action";
+
+    private static final int ACTION_ERROR = -1;
     private static final int ACTION_REGISTER = 1;
     private static final int ACTION_DEREGISTER = 2;
+
+    private SharedPreferences sharedPreferences;
 
     public static void requestRegistration(Context context, String station, String[] times) {
         Intent intent = new Intent(context, GcmRegistrationIntentService.class);
@@ -38,57 +47,80 @@ public class GcmRegistrationIntentService extends IntentService {
         context.startService(intent);
     }
 
+    private static void requestErrorNotification(Context context) {
+        Intent intent = new Intent(context, GcmRegistrationIntentService.class);
+        intent.putExtra(KEY_ACTION, ACTION_ERROR);
+        context.startService(intent);
+    }
+
     public GcmRegistrationIntentService() {
         super(TAG);
     }
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        Log.d(TAG, "received intent");
-
         int action = intent.getIntExtra(KEY_ACTION, ACTION_DEREGISTER);
 
-        startForeground(NOTIFICATION_ID, buildNotification());
+        if (action == ACTION_ERROR) {
+            handleRegistrationError();
+            return;
+        }
 
-        if (action == ACTION_REGISTER) {
-            String station = intent.getStringExtra(KEY_STATION_ID);
-            String[] times = intent.getStringArrayExtra(KEY_TIMES);
-            register(station, times);
-        } else {
-            deregister();
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean isInUnhandledErrorState = sharedPreferences.getBoolean(Consts.PREF_UNHANDLED_REGISTRATION_ERROR, false);
+
+        if (isInUnhandledErrorState) {
+            return;
+        }
+
+        startForeground(NOTIFICATION_ID, buildNotification());
+        NotificationManagerCompat.from(this).cancel(NOTIFICATION_FAILURE_ID);
+        RegistrationBroadcastReceiver.sendRegistrationStartedBroadcast(this);
+
+        switch (action) {
+            case ACTION_REGISTER:
+                String station = intent.getStringExtra(KEY_STATION_ID);
+                String[] times = intent.getStringArrayExtra(KEY_TIMES);
+                register(station, times);
+                break;
+            case ACTION_DEREGISTER:
+                deregister();
+                break;
         }
 
         stopForeground(true);
-        Intent registrationComplete = new Intent(Consts.REGISTRATION_COMPLETE);
-        LocalBroadcastManager.getInstance(this).sendBroadcast(registrationComplete);
+        RegistrationBroadcastReceiver.sendRegistrationCompleteBroadcast(this);
     }
 
     private void register(String station, String[] times) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-        sharedPreferences.edit()
-                         .putBoolean(Consts.PREF_POSSIBLY_REGISTERED, true)
-                         .apply();
+        sharedPreferences.edit().putBoolean(Consts.PREF_POSSIBLY_REGISTERED, true).apply();
+
         try {
             InstanceID instanceID = InstanceID.getInstance(this);
             String senderId = getString(com.oczeretko.dsbforsinket.R.string.gcm_defaultSenderId);
             String token = instanceID.getToken(senderId, GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
-            Log.d(TAG, "GCM Registration Token: " + token);
 
             DsbMobileServiceClient client = new DsbMobileServiceClient(this);
             client.register(token, station, times);
 
-            sharedPreferences.edit().putBoolean(Consts.PREF_SENT_TOKEN_TO_SERVER, true).apply();
+            sharedPreferences.edit().putBoolean(Consts.PREF_REGISTRATION_ERROR, false).apply();
 
         } catch (Exception e) {
             Log.d(TAG, "Failed to complete token refresh", e);
-            sharedPreferences.edit().putBoolean(Consts.PREF_SENT_TOKEN_TO_SERVER, false).apply();
-            // TODO: handle
+
+            sharedPreferences.edit()
+                             .putBoolean(Consts.PREF_REGISTRATION_ERROR, true)
+                             .putBoolean(Consts.PREF_UNHANDLED_REGISTRATION_ERROR, true)
+                             .putBoolean(Consts.PREF_POSSIBLY_REGISTERED, true)
+                             .putBoolean(getString(R.string.preferences_notification_key), false)
+                             .apply();
+
+            requestErrorNotification(this);
         }
     }
 
     private void deregister() {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         try {
             InstanceID instanceID = InstanceID.getInstance(this);
@@ -99,14 +131,27 @@ public class GcmRegistrationIntentService extends IntentService {
             client.unregister();
 
             sharedPreferences.edit()
-                             .putBoolean(Consts.PREF_SENT_TOKEN_TO_SERVER, false)
                              .putBoolean(Consts.PREF_POSSIBLY_REGISTERED, false)
+                             .putBoolean(Consts.PREF_REGISTRATION_ERROR, false)
                              .apply();
 
         } catch (Exception e) {
             Log.d(TAG, "Failed to deregister", e);
-            // TODO: handle
+            sharedPreferences.edit()
+                             .putBoolean(Consts.PREF_POSSIBLY_REGISTERED, true)
+                             .putBoolean(Consts.PREF_REGISTRATION_ERROR, true)
+                             .apply();
+            // will retry to deregister when the next push message is received
         }
+    }
+
+    private void handleRegistrationError() {
+        sharedPreferences.edit()
+                         .putBoolean(Consts.PREF_UNHANDLED_REGISTRATION_ERROR, false)
+                         .apply();
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        notificationManager.notify(NOTIFICATION_FAILURE_ID, buildFailureNotification());
     }
 
     private Notification buildNotification() {
@@ -121,6 +166,25 @@ public class GcmRegistrationIntentService extends IntentService {
                    .setSmallIcon(getNotificationIcon())
                    .setContentTitle(getString(R.string.app_name))
                    .setContentText(getString(R.string.notification_gcm_content))
+                   .setContentIntent(pendingIntent)
+                   .build();
+    }
+
+    private Notification buildFailureNotification() {
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        intent.putExtra(MainActivity.EXTRA_SHOW_SETTINGS, true);
+        PendingIntent pendingIntent = PendingIntent.getActivity(getApplicationContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        return new NotificationCompat.Builder(getApplicationContext())
+                   .setCategory(Notification.CATEGORY_SERVICE)
+                   .setOnlyAlertOnce(true)
+                   .setAutoCancel(true)
+                   .setColor(ContextCompat.getColor(this, R.color.colorError))
+                   .setSound(defaultSoundUri)
+                   .setSmallIcon(getNotificationIcon())
+                   .setContentTitle(getString(R.string.app_name))
+                   .setContentText(getString(R.string.notification_gcm_failure_content))
                    .setContentIntent(pendingIntent)
                    .build();
     }

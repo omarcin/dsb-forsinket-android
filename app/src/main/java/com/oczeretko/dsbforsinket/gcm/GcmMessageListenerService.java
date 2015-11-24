@@ -5,12 +5,14 @@ import android.content.*;
 import android.media.*;
 import android.net.*;
 import android.os.*;
+import android.preference.*;
 import android.support.v4.app.*;
 import android.support.v4.content.*;
 import android.text.*;
 import android.util.*;
 
 import com.google.android.gms.gcm.*;
+import com.oczeretko.dsbforsinket.*;
 import com.oczeretko.dsbforsinket.R;
 import com.oczeretko.dsbforsinket.activity.*;
 import com.oczeretko.dsbforsinket.utils.*;
@@ -30,8 +32,15 @@ public class GcmMessageListenerService extends GcmListenerService {
             return;
         }
 
-        PushMessage message = PushMessage.newFromBundle(data);
-        sendNotification(message);
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean isInErrorState = sharedPreferences.getBoolean(Consts.PREF_REGISTRATION_ERROR, false);
+
+        if (isInErrorState) {
+            GcmRegistrationIntentService.requestDeregistration(this);
+        } else {
+            PushMessage message = PushMessage.newFromBundle(data);
+            sendNotification(message);
+        }
     }
 
     private void sendNotification(PushMessage message) {
@@ -42,7 +51,6 @@ public class GcmMessageListenerService extends GcmListenerService {
                                                                 intent,
                                                                 PendingIntent.FLAG_ONE_SHOT);
 
-        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         String title = getResources().getQuantityString(R.plurals.notification_delay_content_title_format,
                                                         message.delayedCount,
                                                         message.delayedCount);
@@ -54,6 +62,7 @@ public class GcmMessageListenerService extends GcmListenerService {
                                                          : getString(R.string.notification_delay_content_format, d.departureName, d.departureTime));
         String content = StringUtils.join(delimiter, namesTimes);
 
+        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder =
             new NotificationCompat.Builder(this)
                 .setCategory(Notification.CATEGORY_MESSAGE)
