@@ -13,7 +13,7 @@
 
     <string name="preferences_notification_key">preferences_notification_key</string>
     <string name="preferences_notification_title">Push notifications</string>
-    <string name="preferences_notification_summary">Get notified if some trains are delayed in the time window you choose (working week only)</string>
+    <string name="preferences_notification_summary">Get notified if some trains are delayed in the selected time range (only Monday-Friday)</string>
 
     <string name="preferences_notification_times">preferences_notification_times</string>
     <string name="preferences_notification_times_title">Notification times</string>
