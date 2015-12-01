@@ -25,6 +25,10 @@ public class DeparturesFragment extends Fragment implements ResultReceiverListen
     private static final String TAG = "DeparturesFragment";
     private static final String KEY_STATION_ID = "STATION_ID";
 
+    private static final String KEY_DEPARTURES = "KEY_DEPARTURES";
+    private static final String KEY_DEPARTURES_TIMESTAMP = "KEY_TIMESTAMP";
+    private static final String KEY_DEPARTURES_STATION = "KEY_STATION";
+
     private View toolbarLoadingIndicator;
     private View loadingIndicator;
     private View errorIndicator;
@@ -54,7 +58,12 @@ public class DeparturesFragment extends Fragment implements ResultReceiverListen
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         station = getArguments().getString(KEY_STATION_ID);
-        setRetainInstance(true);
+        if (savedInstanceState != null) {
+            Log.d(TAG, "restoring state");
+            departures = savedInstanceState.getParcelableArrayList(KEY_DEPARTURES);
+            departuresStation = savedInstanceState.getString(KEY_DEPARTURES_STATION);
+            departuresTimestamp = savedInstanceState.getLong(KEY_DEPARTURES_TIMESTAMP);
+        }
     }
 
     @Override
@@ -68,9 +77,6 @@ public class DeparturesFragment extends Fragment implements ResultReceiverListen
         retryButton.setOnClickListener(_1 -> refreshData());
         toolbarLoadingIndicator = getActivity().findViewById(R.id.main_activity_toolbar_progress_bar);
         setupRecyclerView();
-        if (departures != null) {
-            setData(departures);
-        }
         return view;
     }
 
@@ -80,6 +86,10 @@ public class DeparturesFragment extends Fragment implements ResultReceiverListen
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
+
+        if (departures != null) {
+            setData(departures);
+        }
     }
 
     @Override
@@ -104,6 +114,14 @@ public class DeparturesFragment extends Fragment implements ResultReceiverListen
         cancelRefresh();
         resultReceiver.setResultListener(null);
         loadingIndicator.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putParcelableArrayList(KEY_DEPARTURES, departures);
+        outState.putLong(KEY_DEPARTURES_TIMESTAMP, departuresTimestamp);
+        outState.putString(KEY_DEPARTURES_STATION, departuresStation);
+        super.onSaveInstanceState(outState);
     }
 
     @Override

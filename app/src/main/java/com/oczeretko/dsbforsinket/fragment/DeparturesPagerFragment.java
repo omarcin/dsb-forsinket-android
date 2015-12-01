@@ -24,8 +24,7 @@ public class DeparturesPagerFragment extends Fragment {
         super.onCreate(savedInstanceState);
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         String[] stationIds = preferences.getStringSet(getString(R.string.preferences_stations_key), Consts.STATIONS_DEFAULT).toArray(new String[0]);
-        adapter = new DeparturesPagerAdapter(getContext(), getFragmentManager(), stationIds);
-        setRetainInstance(true);
+        adapter = new DeparturesPagerAdapter(getContext(), getChildFragmentManager(), stationIds);
     }
 
     @Override

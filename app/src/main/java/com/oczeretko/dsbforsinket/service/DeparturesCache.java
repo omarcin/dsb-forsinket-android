@@ -6,7 +6,7 @@ import com.oczeretko.dsbforsinket.data.*;
 
 import java.util.*;
 
-class DeparturesCache {
+public class DeparturesCache {
 
     private final LruCache cache;
     private final long validityInMillis;
