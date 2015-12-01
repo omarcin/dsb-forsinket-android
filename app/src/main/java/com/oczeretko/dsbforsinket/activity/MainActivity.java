@@ -179,7 +179,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         try {
             getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.main_activity_content, createFragment(fragmentClass), TAG_FRAGMENT)
+                .replace(R.id.main_activity_content, fragmentClass.newInstance(), TAG_FRAGMENT)
                 .commit();
             currentFragmentClass = fragmentClass;
             dismissSnackbarIfShown();
@@ -187,14 +187,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Log.e(TAG, "", e);
         } catch (IllegalAccessException e) {
             Log.e(TAG, "", e);
-        }
-    }
-
-    private Fragment createFragment(Class<? extends Fragment> fragmentClass) throws InstantiationException, IllegalAccessException {
-        if (fragmentClass == DeparturesPagerFragment.class) {
-            return DeparturesPagerFragment.newInstance();
-        } else {
-            return fragmentClass.newInstance();
         }
     }
 }

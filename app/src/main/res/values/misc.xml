@@ -2,4 +2,5 @@
 <resources>
     <integer name="notification_snooze_time_minutes">60</integer>
     <integer name="snackbar_first_visit_delay_millis">2500</integer>
+    <integer name="pager_offscreen_limit">2</integer>
 </resources>

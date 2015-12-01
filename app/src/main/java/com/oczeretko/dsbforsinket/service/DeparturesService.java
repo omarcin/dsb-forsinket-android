@@ -3,6 +3,7 @@ package com.oczeretko.dsbforsinket.service;
 import android.app.*;
 import android.content.*;
 import android.os.*;
+import android.text.format.*;
 import android.util.*;
 
 import com.oczeretko.dsbforsinket.data.*;
@@ -22,17 +23,22 @@ public class DeparturesService extends IntentService {
     public final static int RESULT_ERROR = -1;
     public final static String KEY_RESULT = "Result";
 
+    private static final int MAX_CACHE_SIZE = 10;
+    private static final long CACHE_VALIDITY_MILLIS = 30 * DateUtils.SECOND_IN_MILLIS;
+
     private final static String TAG = "DeparturesService";
     private final static String KEY_RECEIVER = "ResultReceiver";
     private final static String KEY_STATION = "Station";
     private final OkHttpClient httpClient;
+
+    private final DeparturesCache departuresCache = new DeparturesCache(MAX_CACHE_SIZE, CACHE_VALIDITY_MILLIS);
 
     public DeparturesService() {
         super(TAG);
         httpClient = new OkHttpClient();
     }
 
-    public static void requestData(Context context, ResultReceiver resultReceiver, String station){
+    public static void requestData(Context context, ResultReceiver resultReceiver, String station) {
         Intent intent = new Intent(context, DeparturesService.class);
         intent.putExtra(KEY_RECEIVER, resultReceiver);
         intent.putExtra(KEY_STATION, station);
@@ -46,8 +52,14 @@ public class DeparturesService extends IntentService {
         String station = intent.getStringExtra(KEY_STATION);
 
         try {
-            ArrayList<DepartureInfo> departures = fetchDepartures(station);
-            Collections.sort(departures, (a, b) -> a.getDepartureTime().compareTo(b.getDepartureTime()));
+
+            ArrayList<DepartureInfo> departures = departuresCache.get(station);
+            if (departures == null) {
+                departures = fetchDepartures(station);
+                Collections.sort(departures, (a, b) -> a.getDepartureTime().compareTo(b.getDepartureTime()));
+                departuresCache.put(station, departures);
+            }
+
             Bundle data = new Bundle();
             data.putParcelableArrayList(KEY_RESULT, departures);
             resultReceiver.send(RESULT_OK, data);
