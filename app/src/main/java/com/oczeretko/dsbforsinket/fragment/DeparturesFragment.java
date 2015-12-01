@@ -68,6 +68,9 @@ public class DeparturesFragment extends Fragment implements ResultReceiverListen
         retryButton.setOnClickListener(_1 -> refreshData());
         toolbarLoadingIndicator = getActivity().findViewById(R.id.main_activity_toolbar_progress_bar);
         setupRecyclerView();
+        if (departures != null) {
+            setData(departures);
+        }
         return view;
     }
 
@@ -85,7 +88,6 @@ public class DeparturesFragment extends Fragment implements ResultReceiverListen
         resultReceiver.setResultListener(this);
         if (departures != null && station.equals(departuresStation)) {
             long dataAge = System.currentTimeMillis() - departuresTimestamp;
-            setData(departures);
             if (dataAge > REFRESH_INTERVAL) {
                 refreshData();
             } else {
@@ -110,6 +112,7 @@ public class DeparturesFragment extends Fragment implements ResultReceiverListen
         switch (resultCode) {
             case DeparturesService.RESULT_OK:
                 ArrayList<DepartureInfo> receivedDepartures = resultData.getParcelableArrayList(DeparturesService.KEY_RESULT);
+                departuresTimestamp = System.currentTimeMillis();
                 setData(receivedDepartures);
                 scheduleRefresh();
                 break;
@@ -145,7 +148,6 @@ public class DeparturesFragment extends Fragment implements ResultReceiverListen
 
     private void setData(ArrayList<DepartureInfo> departures) {
         this.departures = departures;
-        departuresTimestamp = System.currentTimeMillis();
         departuresStation = station;
         adapter.setDepartures(departures);
         recyclerView.setVisibility(View.VISIBLE);
