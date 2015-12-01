@@ -25,10 +25,6 @@ public class DeparturesFragment extends Fragment implements ResultReceiverListen
     private static final String TAG = "DeparturesFragment";
     private static final String KEY_STATION_ID = "STATION_ID";
 
-    private static final String KEY_DEPARTURES = "KEY_DEPARTURES";
-    private static final String KEY_DEPARTURES_TIMESTAMP = "KEY_TIMESTAMP";
-    private static final String KEY_DEPARTURES_STATION = "KEY_STATION";
-
     private View toolbarLoadingIndicator;
     private View loadingIndicator;
     private View errorIndicator;
@@ -39,10 +35,8 @@ public class DeparturesFragment extends Fragment implements ResultReceiverListen
     private ResultReceiverListenable resultReceiver;
 
     private String station;
-
-    private ArrayList<DepartureInfo> departures;
     private long departuresTimestamp;
-    private String departuresStation;
+    private ArrayList<DepartureInfo> departures;
 
     private Handler refreshHandler = new Handler(toHandlerCallback(this::refreshData));
 
@@ -58,11 +52,10 @@ public class DeparturesFragment extends Fragment implements ResultReceiverListen
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         station = getArguments().getString(KEY_STATION_ID);
-        if (savedInstanceState != null) {
-            Log.d(TAG, "restoring state");
-            departures = savedInstanceState.getParcelableArrayList(KEY_DEPARTURES);
-            departuresStation = savedInstanceState.getString(KEY_DEPARTURES_STATION);
-            departuresTimestamp = savedInstanceState.getLong(KEY_DEPARTURES_TIMESTAMP);
+        DeparturesCache.CachedDepartures cachedDepartures = DeparturesCache.getInstance().get(station);
+        if (cachedDepartures != null) {
+            departures = cachedDepartures.getDepartures();
+            departuresTimestamp = cachedDepartures.getTimestamp();
         }
     }
 
@@ -96,7 +89,7 @@ public class DeparturesFragment extends Fragment implements ResultReceiverListen
     public void onResume() {
         super.onResume();
         resultReceiver.setResultListener(this);
-        if (departures != null && station.equals(departuresStation)) {
+        if (departures != null) {
             long dataAge = System.currentTimeMillis() - departuresTimestamp;
             if (dataAge > REFRESH_INTERVAL) {
                 refreshData();
@@ -117,20 +110,13 @@ public class DeparturesFragment extends Fragment implements ResultReceiverListen
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
-        outState.putParcelableArrayList(KEY_DEPARTURES, departures);
-        outState.putLong(KEY_DEPARTURES_TIMESTAMP, departuresTimestamp);
-        outState.putString(KEY_DEPARTURES_STATION, departuresStation);
-        super.onSaveInstanceState(outState);
-    }
-
-    @Override
     public void onReceiveResult(int resultCode, Bundle resultData) {
         Log.d(TAG, "received result");
         switch (resultCode) {
             case DeparturesService.RESULT_OK:
                 ArrayList<DepartureInfo> receivedDepartures = resultData.getParcelableArrayList(DeparturesService.KEY_RESULT);
                 departuresTimestamp = System.currentTimeMillis();
+                DeparturesCache.getInstance().put(station, receivedDepartures);
                 setData(receivedDepartures);
                 scheduleRefresh();
                 break;
@@ -166,7 +152,6 @@ public class DeparturesFragment extends Fragment implements ResultReceiverListen
 
     private void setData(ArrayList<DepartureInfo> departures) {
         this.departures = departures;
-        departuresStation = station;
         adapter.setDepartures(departures);
         recyclerView.setVisibility(View.VISIBLE);
         loadingIndicator.setVisibility(View.GONE);
