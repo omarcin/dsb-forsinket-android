@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <ListPreference
-        android:key="@string/preferences_station_key"
-        android:title="@string/preferences_station_title"
+    <android.support.v7.preference.MultiSelectListPreferenceCompat
+        android:key="@string/preferences_stations_key"
+        android:title="@string/preferences_stations_title"
         android:summary="%s"
-        android:dialogTitle="@string/preferences_station_title"
+        android:dialogTitle="@string/preferences_stations_title"
         android:entries="@array/stations_names"
         android:entryValues="@array/stations_uics"
-        android:defaultValue="8600626"
+        android:defaultValue="@array/stations_default"
         />
 
     <CheckBoxPreference

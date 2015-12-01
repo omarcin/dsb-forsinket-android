@@ -13,8 +13,6 @@ import android.widget.*;
 import com.google.android.gms.common.*;
 import com.oczeretko.dsbforsinket.*;
 import com.oczeretko.dsbforsinket.R;
-import com.oczeretko.dsbforsinket.gcm.*;
-import com.oczeretko.dsbforsinket.utils.*;
 
 public class SettingsFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -23,7 +21,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
 
     private ProgressBar toolbarLoadingIndicator;
     private String keyNotification;
-    private String keyStation;
+    private String keyStations;
     private String keyTimes;
 
     public SettingsFragment() {
@@ -33,7 +31,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
     public void onCreatePreferences(Bundle bundle, String s) {
         addPreferencesFromResource(R.xml.preferences);
         keyNotification = getString(R.string.preferences_notification_key);
-        keyStation = getString(R.string.preferences_station_key);
+        keyStations = getString(R.string.preferences_stations_key);
         keyTimes = getString(R.string.preferences_notification_times);
     }
 
@@ -63,7 +61,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 
-        if (!key.equals(keyNotification) && !key.equals(keyStation) && !key.equals(keyTimes)) {
+        if (!key.equals(keyNotification) && !key.equals(keyStations) && !key.equals(keyTimes)) {
             return;
         }
 
@@ -79,13 +77,13 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
             String[] times = sharedPreferences.getStringSet(keyTimes, Consts.TIMES_DEFAULT).toArray(new String[0]);
 
             if (checkPlayServices(true)) {
-                String station = sharedPreferences.getString(keyStation, Consts.STATION_DEFAULT);
-                GcmRegistrationIntentService.requestRegistration(getActivity(), station, times);
-                toolbarLoadingIndicator.setVisibility(View.VISIBLE);
+                String[] stations = sharedPreferences.getStringSet(keyStations, Consts.STATIONS_DEFAULT).toArray(new String[0]);
+                // GcmRegistrationIntentService.requestRegistration(getActivity(), station, times);
+                // toolbarLoadingIndicator.setVisibility(View.VISIBLE);
             }
         } else if (sharedPreferences.getBoolean(Consts.PREF_POSSIBLY_REGISTERED, false) && checkPlayServices(false)) {
-            GcmRegistrationIntentService.requestDeregistration(getActivity());
-            toolbarLoadingIndicator.setVisibility(View.VISIBLE);
+            // GcmRegistrationIntentService.requestDeregistration(getActivity());
+            // toolbarLoadingIndicator.setVisibility(View.VISIBLE);
         }
     }
 

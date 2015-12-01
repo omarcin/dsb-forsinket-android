@@ -1,11 +1,8 @@
 package com.oczeretko.dsbforsinket.fragment;
 
 
-import android.content.*;
 import android.os.*;
-import android.preference.*;
 import android.support.v4.app.*;
-import android.support.v7.app.*;
 import android.support.v7.widget.*;
 import android.text.format.*;
 import android.util.*;
@@ -16,19 +13,17 @@ import com.oczeretko.dsbforsinket.*;
 import com.oczeretko.dsbforsinket.adapter.*;
 import com.oczeretko.dsbforsinket.data.*;
 import com.oczeretko.dsbforsinket.service.*;
-import com.oczeretko.dsbforsinket.utils.*;
 
 import java.util.*;
 
-import static com.oczeretko.dsbforsinket.utils.HandlerUtils.toHandlerCallback;
-import static com.oczeretko.dsbforsinket.utils.ListUtils.first;
-import static com.oczeretko.dsbforsinket.utils.ListUtils.zip;
+import static com.oczeretko.dsbforsinket.utils.HandlerUtils.*;
 
 
 public class DeparturesFragment extends Fragment implements ResultReceiverListenable.ResultListener {
 
     public static final long REFRESH_INTERVAL = DateUtils.MINUTE_IN_MILLIS;
     private static final String TAG = "DeparturesFragment";
+    private static final String KEY_STATION_ID = "STATION_ID";
 
     private View toolbarLoadingIndicator;
     private View loadingIndicator;
@@ -47,9 +42,18 @@ public class DeparturesFragment extends Fragment implements ResultReceiverListen
 
     private Handler refreshHandler = new Handler(toHandlerCallback(this::refreshData));
 
+    public static DeparturesFragment newInstance(String stationId) {
+        Bundle args = new Bundle();
+        args.putString(KEY_STATION_ID, stationId);
+        DeparturesFragment fragment = new DeparturesFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        station = getArguments().getString(KEY_STATION_ID);
         setRetainInstance(true);
     }
 
@@ -79,10 +83,6 @@ public class DeparturesFragment extends Fragment implements ResultReceiverListen
     public void onResume() {
         super.onResume();
         resultReceiver.setResultListener(this);
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        station = preferences.getString(getString(R.string.preferences_station_key), Consts.STATION_DEFAULT);
-        ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle(Stations.getStationNameById(getContext(), station));
-
         if (departures != null && station.equals(departuresStation)) {
             long dataAge = System.currentTimeMillis() - departuresTimestamp;
             setData(departures);

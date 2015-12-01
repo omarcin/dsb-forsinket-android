@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else if (fragment != null) {
             currentFragmentClass = fragment.getClass();
         } else {
-            showFragment(DeparturesFragment.class);
+            showFragment(DeparturesPagerFragment.class);
         }
 
         if (!checkSettingsVisited()) {
@@ -126,7 +126,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (intent.getBooleanExtra(EXTRA_SHOW_SETTINGS, false)) {
             showFragment(SettingsFragment.class);
         } else {
-            showFragment(DeparturesFragment.class);
+            showFragment(DeparturesPagerFragment.class);
         }
     }
 
@@ -147,7 +147,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         switch (menuItem.getItemId()) {
             case R.id.drawer_departures:
-                showFragment(DeparturesFragment.class);
+                showFragment(DeparturesPagerFragment.class);
                 menuItem.setChecked(true);
                 return true;
             case R.id.drawer_settings:
@@ -164,7 +164,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
         } else if (currentFragmentClass == SettingsFragment.class) {
-            showFragment(DeparturesFragment.class);
+            showFragment(DeparturesPagerFragment.class);
             menuItemDepartures.setChecked(true);
         } else {
             super.onBackPressed();
@@ -179,7 +179,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         try {
             getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.main_activity_content, fragmentClass.newInstance(), TAG_FRAGMENT)
+                .replace(R.id.main_activity_content, createFragment(fragmentClass), TAG_FRAGMENT)
                 .commit();
             currentFragmentClass = fragmentClass;
             dismissSnackbarIfShown();
@@ -187,6 +187,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Log.e(TAG, "", e);
         } catch (IllegalAccessException e) {
             Log.e(TAG, "", e);
+        }
+    }
+
+    private Fragment createFragment(Class<? extends Fragment> fragmentClass) throws InstantiationException, IllegalAccessException {
+        if (fragmentClass == DeparturesPagerFragment.class) {
+            return DeparturesPagerFragment.newInstance();
+        } else {
+            return fragmentClass.newInstance();
         }
     }
 }

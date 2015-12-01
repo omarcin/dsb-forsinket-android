@@ -10,8 +10,8 @@ public final class Consts {
     public static final String INTENT_ACTION_REGISTRATION_UPDATE = "ACTION_REGISTRATION";
     public static final String INTENT_EXTRA_REGISTRATION_COMPLETE = "EXTRA_REGISTRATION_COMPLETE";
 
-    public static final String STATION_DEFAULT = "8600626"; // Central station
     public static final Set<String> TIMES_DEFAULT = new HashSet<>();
+    public static final Set<String> STATIONS_DEFAULT = new HashSet<>();
 
     public static final String PREF_POSSIBLY_REGISTERED = "REGISTERED_MAYBE";
     public static final String PREF_LAST_SNOOZE_MILLIS = "SNOOZE";
@@ -21,6 +21,8 @@ public final class Consts {
 
     {
         TIMES_DEFAULT.add("7:15");
+        STATIONS_DEFAULT.add("8600626"); // Central station
+        STATIONS_DEFAULT.add("8600646"); // Norreport
     }
 
     private Consts() {

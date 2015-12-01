@@ -6,10 +6,10 @@
 
     <string name="error_text">Could not get the departures :(</string>
 
-    <string name="button_try_again">Retry</string>
+    <string name="button_try_again">Try again</string>
 
-    <string name="preferences_station_key">preferences_station_key</string>
-    <string name="preferences_station_title">Your station</string>
+    <string name="preferences_stations_key">preferences_stations_key</string>
+    <string name="preferences_stations_title">Your station</string>
 
     <string name="preferences_notification_key">preferences_notification_key</string>
     <string name="preferences_notification_title">Push notifications</string>
