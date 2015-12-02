@@ -18,6 +18,9 @@ import com.oczeretko.dsbforsinket.*;
 import com.oczeretko.dsbforsinket.R;
 import com.oczeretko.dsbforsinket.fragment.*;
 import com.oczeretko.dsbforsinket.receivers.*;
+import com.oczeretko.dsbforsinket.utils.*;
+
+import static com.oczeretko.dsbforsinket.utils.CollectionsUtils.*;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -48,7 +51,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         findViews();
         setupViews();
 
-        Fragment fragment = getSupportFragmentManager().findFragmentByTag(TAG_FRAGMENT);
+        Fragment fragment = getShownFragment();
 
         if (getIntent().getBooleanExtra(EXTRA_SHOW_SETTINGS, false)) {
             showFragment(SettingsFragment.class);
@@ -77,6 +80,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp);
         navigationView.setNavigationItemSelectedListener(this);
+        SubMenu departuresSubMenu = navigationView.getMenu().findItem(R.id.drawer_departures).getSubMenu();
+        String[] stationIds = Stations.getSelectedStationIds(this);
+        for (int i = 0; i < stationIds.length && i < Consts.IDS.length; i++) {
+            departuresSubMenu.add(0, Consts.IDS[i], 0, Stations.getStationNameById(this, stationIds[i]));
+        }
     }
 
     private boolean checkSettingsVisited() {
@@ -145,17 +153,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onNavigationItemSelected(MenuItem menuItem) {
         drawerLayout.closeDrawer(GravityCompat.START);
 
-        switch (menuItem.getItemId()) {
-            case R.id.drawer_departures:
-                showFragment(DeparturesPagerFragment.class);
-                menuItem.setChecked(true);
-                return true;
-            case R.id.drawer_settings:
-                showFragment(SettingsFragment.class);
-                menuItem.setChecked(true);
-                return true;
-            default:
-                return false;
+        int tab = indexOf(Consts.IDS, menuItem.getItemId());
+        if (tab >= 0) {
+            DeparturesPagerFragment fragment = showFragment(DeparturesPagerFragment.class);
+            fragment.showTab(tab);
+            return true;
+        } else if (menuItem.getItemId() == R.id.drawer_settings) {
+            showFragment(SettingsFragment.class);
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -171,22 +178,30 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    private void showFragment(Class<? extends Fragment> fragmentClass) {
+    private <F extends Fragment> F showFragment(Class<F> fragmentClass) {
         if (currentFragmentClass == fragmentClass) {
-            return;
+            return (F)getShownFragment();
         }
 
         try {
+            Fragment fragment = fragmentClass.newInstance();
             getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.main_activity_content, fragmentClass.newInstance(), TAG_FRAGMENT)
+                .replace(R.id.main_activity_content, fragment, TAG_FRAGMENT)
                 .commit();
             currentFragmentClass = fragmentClass;
             dismissSnackbarIfShown();
+            return (F)fragment;
         } catch (InstantiationException e) {
             Log.e(TAG, "", e);
         } catch (IllegalAccessException e) {
             Log.e(TAG, "", e);
         }
+
+        return null; // should not happen
+    }
+
+    private Fragment getShownFragment() {
+        return getSupportFragmentManager().findFragmentByTag(TAG_FRAGMENT);
     }
 }

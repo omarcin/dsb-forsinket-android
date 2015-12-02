@@ -6,11 +6,9 @@ import android.support.annotation.*;
 import android.support.design.widget.*;
 import android.support.v4.app.*;
 import android.support.v4.view.*;
-import android.support.v7.preference.*;
 import android.view.*;
 
 import com.oczeretko.dsbforsinket.*;
-import com.oczeretko.dsbforsinket.R;
 import com.oczeretko.dsbforsinket.utils.*;
 
 public class DeparturesPagerFragment extends Fragment {
@@ -22,8 +20,7 @@ public class DeparturesPagerFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-        String[] stationIds = preferences.getStringSet(getString(R.string.preferences_stations_key), Consts.STATIONS_DEFAULT).toArray(new String[0]);
+        String[] stationIds = Stations.getSelectedStationIds(getContext());
         adapter = new DeparturesPagerAdapter(getContext(), getChildFragmentManager(), stationIds);
     }
 
@@ -36,6 +33,12 @@ public class DeparturesPagerFragment extends Fragment {
         viewPager.setOffscreenPageLimit(getResources().getInteger(R.integer.pager_offscreen_limit));
         tabLayout.setupWithViewPager(viewPager);
         return view;
+    }
+
+    public void showTab(int tab) {
+        if (viewPager.getAdapter().getCount() > tab) {
+            viewPager.setCurrentItem(tab, true);
+        }
     }
 
     private static class DeparturesPagerAdapter extends FragmentStatePagerAdapter {

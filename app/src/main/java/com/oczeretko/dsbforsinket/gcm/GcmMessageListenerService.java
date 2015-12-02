@@ -56,7 +56,7 @@ public class GcmMessageListenerService extends GcmListenerService {
                                                         message.delayedCount);
 
         String delimiter = getString(R.string.notification_delay_content_delimiter);
-        List<String> namesTimes = ListUtils.map(message.delays,
+        List<String> namesTimes = CollectionsUtils.map(message.delays,
                                                 d -> d.departureTime.isEmpty()
                                                          ? getString(R.string.notification_delay_content_format_no_time, d.departureName)
                                                          : getString(R.string.notification_delay_content_format, d.departureName, d.departureTime));

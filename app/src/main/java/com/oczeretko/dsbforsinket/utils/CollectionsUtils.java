@@ -4,8 +4,8 @@ import android.support.v4.util.*;
 
 import java.util.*;
 
-public final class ListUtils {
-    private ListUtils() {
+public final class CollectionsUtils {
+    private CollectionsUtils() {
     }
 
     public static <Source, Result> List<Result> map(Iterable<Source> sourceItems, Func<Source, Result> func) {
@@ -64,6 +64,17 @@ public final class ListUtils {
         }
 
         return result;
+    }
+
+    public static int indexOf(int[] array, int element) {
+        int len = array.length;
+        for (int i = 0; i < len; i++) {
+            if (array[i] == element) {
+                return i;
+            }
+        }
+
+        return -1;
     }
 
     public interface Func<Source, Result> {

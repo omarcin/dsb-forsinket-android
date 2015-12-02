@@ -1,9 +1,12 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <group android:checkableBehavior="single">
+    <group>
         <item
             android:id="@+id/drawer_departures"
-            android:checked="true"
-            android:title="@string/drawer_departures" />
+            android:title="@string/drawer_departures" >
+            <menu>
+                <!-- will be created dynamically -->
+            </menu>
+            </item>
         <item
             android:id="@+id/drawer_settings"
             android:title="@string/drawer_settings" />
