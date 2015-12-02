@@ -116,7 +116,6 @@ public class DeparturesFragment extends Fragment implements ResultReceiverListen
             case DeparturesService.RESULT_OK:
                 ArrayList<DepartureInfo> receivedDepartures = resultData.getParcelableArrayList(DeparturesService.KEY_RESULT);
                 departuresTimestamp = System.currentTimeMillis();
-                DeparturesCache.getInstance().put(station, receivedDepartures);
                 setData(receivedDepartures);
                 scheduleRefresh();
                 break;

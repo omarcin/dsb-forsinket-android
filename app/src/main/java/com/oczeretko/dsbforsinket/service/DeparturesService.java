@@ -52,6 +52,7 @@ public class DeparturesService extends IntentService {
             Bundle data = new Bundle();
             data.putParcelableArrayList(KEY_RESULT, departures);
             resultReceiver.send(RESULT_OK, data);
+            DeparturesCache.getInstance().put(station, departures);
 
         } catch (Exception e) {
             Log.e(TAG, "", e);

@@ -156,7 +156,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int tab = indexOf(Consts.IDS, menuItem.getItemId());
         if (tab >= 0) {
             DeparturesPagerFragment fragment = showFragment(DeparturesPagerFragment.class);
-            fragment.showTab(tab);
+            handler.postDelayed(() -> fragment.showTab(tab), 100);
             return true;
         } else if (menuItem.getItemId() == R.id.drawer_settings) {
             showFragment(SettingsFragment.class);
