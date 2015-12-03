@@ -22,7 +22,8 @@ import com.oczeretko.dsbforsinket.utils.*;
 
 import static com.oczeretko.dsbforsinket.utils.CollectionsUtils.*;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, SharedPreferences.OnSharedPreferenceChangeListener {
+public class MainActivity extends AppCompatActivity
+    implements NavigationView.OnNavigationItemSelectedListener, SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final String TAG = "MainActivity";
     private static final String TAG_FRAGMENT = "Fragment";
