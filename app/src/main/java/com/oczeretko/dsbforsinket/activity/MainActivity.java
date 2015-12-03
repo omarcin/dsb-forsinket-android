@@ -22,7 +22,7 @@ import com.oczeretko.dsbforsinket.utils.*;
 
 import static com.oczeretko.dsbforsinket.utils.CollectionsUtils.*;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final String TAG = "MainActivity";
     private static final String TAG_FRAGMENT = "Fragment";
@@ -50,16 +50,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         findViews();
         setupViews();
-
-        Fragment fragment = getShownFragment();
-
-        if (getIntent().getBooleanExtra(EXTRA_SHOW_SETTINGS, false)) {
-            showFragment(SettingsFragment.class);
-        } else if (fragment != null) {
-            currentFragmentClass = fragment.getClass();
-        } else {
-            showFragment(DeparturesPagerFragment.class);
-        }
+        setupDrawerMenu();
+        setupFragment();
 
         if (!checkSettingsVisited()) {
             showIntroSnackbarDelayed();
@@ -80,10 +72,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_white_24dp);
         navigationView.setNavigationItemSelectedListener(this);
+    }
+
+    private void setupDrawerMenu() {
         SubMenu departuresSubMenu = navigationView.getMenu().findItem(R.id.drawer_departures).getSubMenu();
         String[] stationIds = Stations.getSelectedStationIds(this);
         for (int i = 0; i < stationIds.length && i < Consts.IDS.length; i++) {
             departuresSubMenu.add(0, Consts.IDS[i], 0, Stations.getStationNameById(this, stationIds[i]));
+        }
+    }
+
+    private void setupFragment() {
+        Fragment fragment = getShownFragment();
+        if (getIntent().getBooleanExtra(EXTRA_SHOW_SETTINGS, false)) {
+            showFragment(SettingsFragment.class);
+        } else if (fragment != null) {
+            currentFragmentClass = fragment.getClass();
+        } else {
+            showFragment(DeparturesPagerFragment.class);
         }
     }
 
@@ -118,6 +124,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         LocalBroadcastManager.getInstance(this)
                              .registerReceiver(registrationBroadcastReceiver,
                                                new IntentFilter(Consts.INTENT_ACTION_REGISTRATION_UPDATE));
+        PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(this);
     }
 
     @Override
@@ -125,6 +132,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         LocalBroadcastManager.getInstance(this)
                              .unregisterReceiver(registrationBroadcastReceiver);
         registrationBroadcastReceiver = null;
+        PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(this);
         super.onPause();
     }
 
@@ -135,6 +143,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             showFragment(SettingsFragment.class);
         } else {
             showFragment(DeparturesPagerFragment.class);
+        }
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (key.equals(getString(R.string.preferences_stations_key))) {
+            setupDrawerMenu();
         }
     }
 
