@@ -9,6 +9,9 @@ import android.view.*;
 
 import com.oczeretko.dsbforsinket.*;
 import com.oczeretko.dsbforsinket.adapter.*;
+import com.oczeretko.dsbforsinket.data.*;
+
+import java.util.*;
 
 public class PreferencesFragment extends Fragment {
 
@@ -27,7 +30,10 @@ public class PreferencesFragment extends Fragment {
 
     private void setupRecyclerView() {
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-        StationPreferenceAdapter adapter = new StationPreferenceAdapter();
+        ArrayList<StationPreference> stations = new ArrayList<>();
+        stations.add(new StationPreference("id1", "Name 1"));
+        stations.add(new StationPreference("id2", "Name 2"));
+        StationPreferenceAdapter adapter = new StationPreferenceAdapter(stations);
         recycler.setHasFixedSize(true);
         recycler.setLayoutManager(layoutManager);
         recycler.setAdapter(adapter);

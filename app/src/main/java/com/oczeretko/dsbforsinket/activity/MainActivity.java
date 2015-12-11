@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity
     private void setupFragment() {
         Fragment fragment = getShownFragment();
         if (getIntent().getBooleanExtra(EXTRA_SHOW_SETTINGS, false)) {
-            showFragment(SettingsFragment.class);
+            showFragment(PreferencesFragment.class);
         } else if (fragment != null) {
             currentFragmentClass = fragment.getClass();
         } else {
@@ -106,7 +106,7 @@ public class MainActivity extends AppCompatActivity
 
     private void showIntroStackbar() {
         snackbar = Snackbar.make(coordinatorLayout, R.string.snackbar_first_visit, Snackbar.LENGTH_INDEFINITE);
-        snackbar.setAction(R.string.snackbar_first_visit_action_settings, _1 -> showFragment(SettingsFragment.class));
+        snackbar.setAction(R.string.snackbar_first_visit_action_settings, _1 -> showFragment(PreferencesFragment.class));
         snackbar.show();
     }
 
@@ -141,7 +141,7 @@ public class MainActivity extends AppCompatActivity
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         if (intent.getBooleanExtra(EXTRA_SHOW_SETTINGS, false)) {
-            showFragment(SettingsFragment.class);
+            showFragment(PreferencesFragment.class);
         } else {
             showFragment(DeparturesPagerFragment.class);
         }
@@ -175,7 +175,7 @@ public class MainActivity extends AppCompatActivity
             handler.postDelayed(() -> fragment.showTab(tab), 100);
             return true;
         } else if (menuItem.getItemId() == R.id.drawer_settings) {
-            showFragment(SettingsFragment.class);
+            showFragment(PreferencesFragment.class);
             return true;
         } else {
             return false;
@@ -186,7 +186,7 @@ public class MainActivity extends AppCompatActivity
     public void onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START);
-        } else if (currentFragmentClass == SettingsFragment.class) {
+        } else if (currentFragmentClass == PreferencesFragment.class) {
             showFragment(DeparturesPagerFragment.class);
             menuItemDepartures.setChecked(true);
         } else {
