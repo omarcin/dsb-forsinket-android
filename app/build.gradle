@@ -41,4 +41,5 @@ dependencies {
     compile 'com.microsoft.azure:azure-mobile-services-android-sdk:2.0.3'
     compile 'com.squareup.okhttp:okhttp:2.5.0'
     compile 'com.android.support:support-v4:23.1.1'
+    compile 'io.realm:realm-android:0.86.1'
 }

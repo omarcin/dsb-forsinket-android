@@ -2,6 +2,7 @@ package com.oczeretko.dsbforsinket.fragment;
 
 
 import android.os.*;
+import android.support.annotation.*;
 import android.support.design.widget.*;
 import android.support.v4.app.*;
 import android.support.v7.widget.*;
@@ -13,10 +14,20 @@ import com.oczeretko.dsbforsinket.data.*;
 
 import java.util.*;
 
+import io.realm.*;
+
 public class PreferencesFragment extends Fragment {
 
     private RecyclerView recycler;
     private FloatingActionButton addButton;
+    private Realm realm;
+    private StationPreferenceAdapter adapter;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        realm = Realm.getInstance(getActivity());
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -30,15 +41,21 @@ public class PreferencesFragment extends Fragment {
 
     private void setupRecyclerView() {
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
-        ArrayList<StationPreference> stations = new ArrayList<>();
-        stations.add(new StationPreference("id1", "Name 1"));
-        stations.add(new StationPreference("id2", "Name 2"));
-        StationPreferenceAdapter adapter = new StationPreferenceAdapter(stations);
+        RealmResults<StationPreference> stations = realm.where(StationPreference.class).findAllSorted("position");
+        adapter = new StationPreferenceAdapter(stations);
         recycler.setHasFixedSize(true);
         recycler.setLayoutManager(layoutManager);
         recycler.setAdapter(adapter);
     }
 
     private void onAddClick(View view) {
+        realm.beginTransaction();
+        int position = (int)(realm.where(StationPreference.class).count() + 1);
+        StationPreference preference = realm.createObject(StationPreference.class);
+        preference.setPosition(position);
+        preference.setName("TEST NAME " + position);
+        preference.setId(String.valueOf(position));
+        realm.commitTransaction();
+        adapter.notifyItemInserted(position);
     }
 }

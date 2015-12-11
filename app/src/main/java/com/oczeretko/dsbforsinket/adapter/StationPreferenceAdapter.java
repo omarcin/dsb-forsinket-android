@@ -10,11 +10,10 @@ import com.oczeretko.dsbforsinket.data.*;
 import java.util.*;
 
 public class StationPreferenceAdapter extends RecyclerView.Adapter<StationPreferenceAdapter.ViewHolder> {
-
     private static final int LAYOUT_RESOURCE = R.layout.fragment_preferences_item;
-    private final ArrayList<StationPreference> items;
+    private final List<StationPreference> items;
 
-    public StationPreferenceAdapter(ArrayList<StationPreference> items) {
+    public StationPreferenceAdapter(List<StationPreference> items) {
         this.items = items;
     }
 
