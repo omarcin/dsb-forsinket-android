@@ -12,8 +12,6 @@ import com.oczeretko.dsbforsinket.*;
 import com.oczeretko.dsbforsinket.adapter.*;
 import com.oczeretko.dsbforsinket.data.*;
 
-import java.util.*;
-
 import io.realm.*;
 
 public class PreferencesFragment extends Fragment {
@@ -24,12 +22,6 @@ public class PreferencesFragment extends Fragment {
     private StationPreferenceAdapter adapter;
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        realm = Realm.getInstance(getActivity());
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_preferences, container, false);
         addButton = (FloatingActionButton)view.findViewById(R.id.fragment_preferences_add);
@@ -37,6 +29,18 @@ public class PreferencesFragment extends Fragment {
         recycler = (RecyclerView)view.findViewById(R.id.fragment_preferences_recycler);
         setupRecyclerView();
         return view;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        realm = Realm.getInstance(getActivity());
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        realm.close();
     }
 
     private void setupRecyclerView() {
