@@ -15,5 +15,6 @@
     <dimen name="radius">8dp</dimen>
 
     <dimen name="departures_font_size">22sp</dimen>
+    <dimen name="stations_font_size">32sp</dimen>
 
 </resources>

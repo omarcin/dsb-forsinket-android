@@ -8,6 +8,9 @@
         android:id="@+id/fragment_preferences_item_station_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:textSize="@dimen/stations_font_size"
+        android:text="Norreport"
+        android:layout_margin="@dimen/small_margin"
         />
 
 </LinearLayout>

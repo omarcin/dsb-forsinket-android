@@ -14,8 +14,9 @@ import static com.oczeretko.dsbforsinket.utils.CollectionsUtils.*;
 public final class Stations {
 
     private static String[] stations;
-    private static String[] stationNames;
+    private static String[] names;
     private static Map<String, String> namesById;
+    private static List<Pair<String, String>> stationNames;
 
     private Stations() {
     }
@@ -34,10 +35,18 @@ public final class Stations {
         return namesById.get(stationId);
     }
 
+    public static List<Pair<String,String>> getStations(Context context) {
+        if (stations == null) {
+            initialize(context);
+        }
+
+        return stationNames;
+    }
+
     private static void initialize(Context context) {
         stations = context.getResources().getStringArray(R.array.stations_uics);
-        stationNames = context.getResources().getStringArray(R.array.stations_names);
-        Collection<Pair<String, String>> pairs = zip(stations, stationNames);
-        namesById = toMap(pairs, sn -> sn.first, sn -> sn.second);
+        names = context.getResources().getStringArray(R.array.stations_names);
+        stationNames = new ArrayList<>(zip(stations, names));
+        namesById = toMap(stationNames, sn -> sn.first, sn -> sn.second);
     }
 }
