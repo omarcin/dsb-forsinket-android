@@ -56,7 +56,6 @@ public class PreferencesFragment extends Fragment {
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         RealmResults<StationPreference> stations = realm.where(StationPreference.class).findAllSorted("position");
         adapter = new StationPreferenceAdapter(stations);
-        recycler.setHasFixedSize(true);
         recycler.setLayoutManager(layoutManager);
         recycler.setAdapter(adapter);
 

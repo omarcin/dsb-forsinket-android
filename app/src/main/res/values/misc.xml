@@ -21,4 +21,7 @@
     <string name="id_14">14</string>
     <string name="id_15">15</string>
 
+    <string name="tag_position"></string>
+    <string name="tag_holder"></string>
+
 </resources>
