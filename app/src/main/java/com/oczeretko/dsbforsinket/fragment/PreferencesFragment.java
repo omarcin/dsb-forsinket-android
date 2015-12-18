@@ -16,7 +16,7 @@ import com.oczeretko.dsbforsinket.utils.*;
 
 import io.realm.*;
 
-public class PreferencesFragment extends Fragment {
+public class PreferencesFragment extends Fragment implements StationPreferenceAdapter.Listener {
 
     private static final String TAG_STATION_PICKER = "STATIONS";
     private RecyclerView recycler;
@@ -54,8 +54,10 @@ public class PreferencesFragment extends Fragment {
 
     private void setupRecyclerView() {
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+        // TODO: make async
         RealmResults<StationPreference> stations = realm.where(StationPreference.class).findAllSorted("position");
-        adapter = new StationPreferenceAdapter(stations);
+        adapter = new StationPreferenceAdapter(getContext(), stations);
+        adapter.setListener(this);
         recycler.setLayoutManager(layoutManager);
         recycler.setAdapter(adapter);
 
@@ -71,7 +73,7 @@ public class PreferencesFragment extends Fragment {
 
     private void addStation(String stationId) {
         realm.beginTransaction();
-        int position = (int)(realm.where(StationPreference.class).count() + 1);
+        int position = realm.where(StationPreference.class).max("position").intValue() + 1;
         StationPreference preference = realm.createObject(StationPreference.class);
         preference.setPosition(position);
         preference.setName(Stations.getStationNameById(getContext(), stationId));
@@ -79,5 +81,13 @@ public class PreferencesFragment extends Fragment {
         realm.commitTransaction();
         adapter.notifyItemInserted(position);
         recycler.smoothScrollToPosition(adapter.getItemCount() - 1);
+    }
+
+    @Override
+    public void onDeleteClick(int adapterPosition, StationPreference preference) {
+        realm.beginTransaction();
+        preference.removeFromRealm();
+        realm.commitTransaction();
+        adapter.notifyItemRemoved(adapterPosition);
     }
 }

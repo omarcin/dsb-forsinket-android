@@ -9,14 +9,20 @@
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:textColorPrimary">@color/primary_text_default_material_light</item>
 
-        <item name="toolbarStyle">@style/AppThemeToolbar</item>
         <item name="android:activatedBackgroundIndicator">?android:attr/selectableItemBackground</item>
         <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
+
+        <item name="toolbarStyle">@style/AppThemeToolbar</item>
+        <item name="android:imageButtonStyle">@style/AppThemeImageButton</item>
     </style>
 
     <style name="AppThemeToolbar" parent="Widget.AppCompat.Toolbar">
         <item name="android:theme">@style/ThemeOverlay.AppCompat.Dark</item>
         <item name="popupTheme">@style/ThemeOverlay.AppCompat.Light</item>
+    </style>
+
+    <style name="AppThemeImageButton">
+        <item name="android:background">?android:attr/selectableItemBackground</item>
     </style>
 
     <style name="list_item_text">

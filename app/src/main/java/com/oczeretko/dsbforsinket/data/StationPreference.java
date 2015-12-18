@@ -33,4 +33,8 @@ public class StationPreference extends RealmObject{
     public void setPosition(int position) {
         this.position = position;
     }
+
+    public static int compare(StationPreference first, StationPreference second){
+        return first.getPosition() - second.getPosition();
+    }
 }
