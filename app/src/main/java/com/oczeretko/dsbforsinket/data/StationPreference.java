@@ -6,16 +6,16 @@ import io.realm.annotations.*;
 public class StationPreference extends RealmObject{
 
     @PrimaryKey
-    private int position;
-    private String id;
+    private int id;
+    private String stationId;
     private String name;
 
-    public String getId() {
-        return id;
+    public String getStationId() {
+        return stationId;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setStationId(String stationId) {
+        this.stationId = stationId;
     }
 
     public String getName() {
@@ -26,15 +26,15 @@ public class StationPreference extends RealmObject{
         this.name = name;
     }
 
-    public int getPosition() {
-        return position;
+    public int getId() {
+        return id;
     }
 
-    public void setPosition(int position) {
-        this.position = position;
+    public void setId(int id) {
+        this.id = id;
     }
 
     public static int compare(StationPreference first, StationPreference second){
-        return first.getPosition() - second.getPosition();
+        return first.getId() - second.getId();
     }
 }

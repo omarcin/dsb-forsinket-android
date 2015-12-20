@@ -27,7 +27,7 @@ public class PreferencesFragment extends Fragment implements StationPreferenceAd
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        realm = Realm.getInstance(getActivity()); // TODO
+        setRetainInstance(true);
     }
 
     @Override
@@ -36,7 +36,6 @@ public class PreferencesFragment extends Fragment implements StationPreferenceAd
         addButton = (FloatingActionButton)view.findViewById(R.id.fragment_preferences_add);
         addButton.setOnClickListener(this::onAddClick);
         recycler = (RecyclerView)view.findViewById(R.id.fragment_preferences_recycler);
-        setupRecyclerView();
         return view;
     }
 
@@ -44,18 +43,20 @@ public class PreferencesFragment extends Fragment implements StationPreferenceAd
     public void onStart() {
         super.onStart();
         realm = Realm.getInstance(getActivity());
+        setupRecyclerView();
     }
 
     @Override
     public void onStop() {
         super.onStop();
+        recycler.setAdapter(null);
+        adapter = null;
         realm.close();
     }
 
     private void setupRecyclerView() {
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
-        // TODO: make async
-        RealmResults<StationPreference> stations = realm.where(StationPreference.class).findAllSorted("position");
+        RealmResults<StationPreference> stations = realm.where(StationPreference.class).findAllSorted("id");
         adapter = new StationPreferenceAdapter(getContext(), stations);
         adapter.setListener(this);
         recycler.setLayoutManager(layoutManager);
@@ -73,13 +74,15 @@ public class PreferencesFragment extends Fragment implements StationPreferenceAd
 
     private void addStation(String stationId) {
         realm.beginTransaction();
-        int position = realm.where(StationPreference.class).max("position").intValue() + 1;
+        Number maxId = realm.where(StationPreference.class).max("id");
+        int newId = maxId != null ? maxId.intValue() + 1 : 1;
         StationPreference preference = realm.createObject(StationPreference.class);
-        preference.setPosition(position);
+        preference.setId(newId);
         preference.setName(Stations.getStationNameById(getContext(), stationId));
-        preference.setId(stationId);
+        preference.setStationId(stationId);
         realm.commitTransaction();
-        adapter.notifyItemInserted(position);
+
+        adapter.notifyItemInserted(adapter.getItemCount() - 1);
         recycler.smoothScrollToPosition(adapter.getItemCount() - 1);
     }
 
