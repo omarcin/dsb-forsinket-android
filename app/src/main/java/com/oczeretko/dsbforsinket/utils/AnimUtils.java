@@ -14,4 +14,11 @@ public final class AnimUtils {
             }
         };
     }
+
+    public static <T> ValueAnimator.AnimatorUpdateListener onUpdate(final Action<T> action){
+        return animation -> {
+            T value = (T)animation.getAnimatedValue();
+            action.invoke(value);
+        };
+    }
 }

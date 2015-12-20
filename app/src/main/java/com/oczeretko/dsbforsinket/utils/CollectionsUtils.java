@@ -77,7 +77,4 @@ public final class CollectionsUtils {
         return -1;
     }
 
-    public interface Func<Source, Result> {
-        Result invoke(Source item);
-    }
 }

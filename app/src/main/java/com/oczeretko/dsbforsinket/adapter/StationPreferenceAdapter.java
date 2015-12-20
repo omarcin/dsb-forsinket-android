@@ -4,7 +4,6 @@ import android.animation.*;
 import android.content.*;
 import android.content.res.*;
 import android.os.*;
-import android.support.v4.content.*;
 import android.support.v7.widget.*;
 import android.view.*;
 import android.view.animation.*;
@@ -12,8 +11,11 @@ import android.widget.*;
 
 import com.oczeretko.dsbforsinket.*;
 import com.oczeretko.dsbforsinket.data.*;
+import com.oczeretko.dsbforsinket.utils.*;
 
 import java.util.*;
+
+import static com.oczeretko.dsbforsinket.utils.ViewUtils.*;
 
 public class StationPreferenceAdapter extends RecyclerView.Adapter<StationPreferenceAdapter.ViewHolder> {
     private static final int LAYOUT_RESOURCE = R.layout.fragment_preferences_item;
@@ -55,19 +57,30 @@ public class StationPreferenceAdapter extends RecyclerView.Adapter<StationPrefer
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         holder.preference = items.get(position);
+
+        holder.name.setText(holder.preference.getName());
+        holder.expand.setTag(TAG_HOLDER, holder);
+        holder.expand.setOnClickListener(this::onExpandCollapseClick);
+        holder.delete.setTag(TAG_HOLDER, holder);
+        holder.delete.setOnClickListener(this::onDeleteClick);
+
         boolean isItemExpanded = isExpanded(holder.preference);
         if (isItemExpanded) {
             expandedViewHolder = holder;
+            holder.expandedLayout.setVisibility(View.VISIBLE);
+            holder.delete.setVisibility(View.VISIBLE);
+            holder.status.setVisibility(View.GONE);
+            holder.expand.setRotation(180f);
+        } else {
+            holder.expandedLayout.setVisibility(View.GONE);
+            holder.delete.setVisibility(View.GONE);
+            holder.status.setVisibility(View.VISIBLE);
+            holder.expand.setRotation(0f);
         }
-        holder.name.setText(holder.preference.getName());
-        bindExpandedLayoutState(holder, isItemExpanded);
 
-        holder.expand.setImageResource(isItemExpanded ? IMG_UP : IMG_DOWN);
-        holder.expand.setTag(TAG_HOLDER, holder);
-        holder.expand.setOnClickListener(this::onExpandCollapseClick);
-
-        holder.delete.setOnClickListener(this::onDeleteClick);
-        holder.delete.setTag(TAG_HOLDER, holder);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            holder.itemView.setElevation(isItemExpanded ? expandedElevation : 0);
+        }
     }
 
     private void onExpandCollapseClick(View view) {
@@ -93,26 +106,6 @@ public class StationPreferenceAdapter extends RecyclerView.Adapter<StationPrefer
         }
     }
 
-    private void bindExpandedLayoutState(ViewHolder holder, boolean isItemExpanded) {
-        if (isItemExpanded) {
-            holder.expandedLayout.setVisibility(View.VISIBLE);
-            holder.delete.setVisibility(View.VISIBLE);
-            holder.status.setVisibility(View.GONE);
-            holder.expand.setRotation(180f);
-        } else {
-            holder.expandedLayout.setVisibility(View.GONE);
-            holder.delete.setVisibility(View.GONE);
-            holder.status.setVisibility(View.VISIBLE);
-            holder.expand.setRotation(0f);
-        }
-
-        holder.getExpandedLayoutParams().setMargins(0, 0, 0, holder.bottomLayout.getHeight());
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            holder.itemView.setElevation(isItemExpanded ? expandedElevation : 0);
-        }
-    }
-
     @Override
     public void onViewRecycled(ViewHolder holder) {
         super.onViewRecycled(holder);
@@ -135,56 +128,35 @@ public class StationPreferenceAdapter extends RecyclerView.Adapter<StationPrefer
         holder.delete.setVisibility(View.VISIBLE);
 
         final ViewTreeObserver observer = holder.itemView.getViewTreeObserver();
-        observer.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-            @Override
-            public boolean onPreDraw() {
-                if (observer.isAlive()) {
-                    observer.removeOnPreDrawListener(this);
-                }
+        onPreDrawExecuteOnce(observer, () -> {
 
-                // holder.itemView.measure(View.MeasureSpec.makeMeasureSpec(ViewGroup.LayoutParams.MATCH_PARENT, View.MeasureSpec.EXACTLY),
-                //                         View.MeasureSpec.makeMeasureSpec(ViewGroup.LayoutParams.WRAP_CONTENT, View.MeasureSpec.EXACTLY));
-                // final int targtetHeight = v.getMeasuredHeight();
+            final int endingHeight = holder.itemView.getHeight();
+            final int distance = endingHeight - startingHeight;
+            final int bottomHeight = holder.bottomLayout.getHeight();
 
+            holder.itemView.getLayoutParams().height = startingHeight;
+            holder.getExpandedLayoutParams().setMargins(0, -distance, 0, bottomHeight);
+            holder.itemView.requestLayout();
 
-                final int endingHeight = holder.itemView.getHeight();
-                final int distance = endingHeight - startingHeight;
-                final int bottomHeight = holder.bottomLayout.getHeight();
-
-                holder.itemView.getLayoutParams().height = startingHeight;
-
-                holder.getExpandedLayoutParams().setMargins(0, -distance, 0, bottomHeight);
+            ValueAnimator animator = ValueAnimator.ofFloat(0f, 1f).setDuration(animationDuration);
+            animator.setInterpolator(new DecelerateInterpolator(expandDeceleration));
+            animator.addUpdateListener(AnimUtils.<Float>onUpdate(value -> {
+                holder.itemView.getLayoutParams().height = (int)(value * distance + startingHeight);
+                holder.getExpandedLayoutParams().setMargins(0, (int)((value - 1) * distance), 0, bottomHeight);
+                holder.expand.setRotation(180f * value);
+                holder.status.setAlpha(1 - value);
+                holder.delete.setAlpha(value);
                 holder.itemView.requestLayout();
+            }));
+            animator.addListener(AnimUtils.onEnd(() -> {
+                holder.itemView.getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
+                holder.expand.setRotation(180f);
+                holder.status.setVisibility(View.GONE);
+                holder.delete.setVisibility(View.VISIBLE);
+            }));
 
-                ValueAnimator animator = ValueAnimator.ofFloat(0f, 1f).setDuration(animationDuration);
-                animator.setInterpolator(new DecelerateInterpolator(expandDeceleration));
-                animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                    @Override
-                    public void onAnimationUpdate(ValueAnimator animator) {
-                        Float value = (Float)animator.getAnimatedValue();
-
-                        holder.itemView.getLayoutParams().height = (int)(value * distance + startingHeight);
-                        holder.getExpandedLayoutParams().setMargins(0, (int)((value - 1) * distance), 0, bottomHeight);
-                        holder.expand.setRotation(180f * value);
-                        holder.status.setAlpha(1 - value);
-                        holder.delete.setAlpha(value);
-                        holder.itemView.requestLayout();
-                    }
-                });
-
-                animator.addListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        holder.itemView.getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
-                        holder.expand.setRotation(180f);
-                        holder.status.setVisibility(View.GONE);
-                        holder.delete.setVisibility(View.VISIBLE);
-                    }
-                });
-
-                animator.start();
-                return false;
-            }
+            animator.start();
+            return false;
         });
     }
 
@@ -196,53 +168,38 @@ public class StationPreferenceAdapter extends RecyclerView.Adapter<StationPrefer
         holder.expandedLayout.setVisibility(View.GONE);
 
         final ViewTreeObserver observer = holder.itemView.getViewTreeObserver();
-        observer.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-            @Override
-            public boolean onPreDraw() {
-                if (observer.isAlive()) {
-                    observer.removeOnPreDrawListener(this);
-                }
+        onPreDrawExecuteOnce(observer, () -> {
 
-                final int endingHeight = holder.itemView.getHeight();
-                final int distance = endingHeight - startingHeight;
-                final int bottomHeight = holder.bottomLayout.getHeight();
+            final int endingHeight = holder.itemView.getHeight();
+            final int distance = endingHeight - startingHeight;
+            final int bottomHeight = holder.bottomLayout.getHeight();
 
-                holder.expandedLayout.setVisibility(View.VISIBLE);
-                holder.delete.setVisibility(View.GONE);
-                holder.status.setVisibility(View.VISIBLE);
-                holder.status.setAlpha(1);
+            holder.expandedLayout.setVisibility(View.VISIBLE);
+            holder.delete.setVisibility(View.GONE);
+            holder.status.setVisibility(View.VISIBLE);
+            holder.status.setAlpha(1);
 
-                ValueAnimator animator = ValueAnimator.ofFloat(0f, 1f).setDuration(animationDuration);
-                animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                    @Override
-                    public void onAnimationUpdate(ValueAnimator animator) {
-                        Float value = (Float)animator.getAnimatedValue();
+            ValueAnimator animator = ValueAnimator.ofFloat(0f, 1f).setDuration(animationDuration);
+            animator.setInterpolator(new DecelerateInterpolator(collapseDeceleration));
+            animator.addUpdateListener(AnimUtils.<Float>onUpdate(value -> {
+                holder.itemView.getLayoutParams().height = (int)(value * distance + startingHeight);
+                holder.getExpandedLayoutParams().setMargins(0, (int)(value * distance), 0, bottomHeight);
+                holder.expand.setRotation(180f * (1 - value));
+                holder.delete.setAlpha(1 - value);
+                holder.status.setAlpha(value);
+                holder.itemView.requestLayout();
+            }));
+            animator.addListener(AnimUtils.onEnd(() -> {
+                holder.itemView.getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
+                holder.getExpandedLayoutParams().setMargins(0, 0, 0, bottomHeight);
+                holder.expandedLayout.setVisibility(View.GONE);
+                holder.expand.setRotation(0);
+            }));
 
-                        holder.itemView.getLayoutParams().height = (int)(value * distance + startingHeight);
-                        holder.getExpandedLayoutParams().setMargins(0, (int)(value * distance), 0, bottomHeight);
-                        holder.expand.setRotation(180f * (1 - value));
-                        holder.delete.setAlpha(1 - value);
-                        holder.status.setAlpha(value);
+            animator.start();
 
-                        holder.itemView.requestLayout();
-                    }
-                });
-                animator.setInterpolator(new DecelerateInterpolator(collapseDeceleration));
-                animator.addListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        holder.itemView.getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
-                        holder.getExpandedLayoutParams().setMargins(0, 0, 0, bottomHeight);
-                        holder.expandedLayout.setVisibility(View.GONE);
-                        holder.expand.setRotation(0);
-                    }
-                });
-                animator.start();
-
-                return false;
-            }
+            return false;
         });
-
     }
 
     public void setListener(Listener listener) {
