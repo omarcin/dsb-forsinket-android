@@ -42,7 +42,10 @@ public class PreferencesFragment extends Fragment implements StationPreferenceAd
     @Override
     public void onStart() {
         super.onStart();
-        realm = Realm.getInstance(getActivity());
+        RealmConfiguration configuration = new RealmConfiguration.Builder(getActivity())
+                                               .deleteRealmIfMigrationNeeded()
+                                               .build();
+        realm = Realm.getInstance(configuration);
         setupRecyclerView();
     }
 

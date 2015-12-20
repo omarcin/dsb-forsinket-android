@@ -19,8 +19,6 @@ import static com.oczeretko.dsbforsinket.utils.ViewUtils.*;
 
 public class StationPreferenceAdapter extends RecyclerView.Adapter<StationPreferenceAdapter.ViewHolder> {
     private static final int LAYOUT_RESOURCE = R.layout.fragment_preferences_item;
-    private static final int IMG_UP = R.drawable.ic_chevron_up_grey600_24dp;
-    private static final int IMG_DOWN = R.drawable.ic_chevron_down_grey600_24dp;
     private static final int TAG_HOLDER = R.string.tag_holder;
 
     private final List<StationPreference> items;
@@ -33,6 +31,7 @@ public class StationPreferenceAdapter extends RecyclerView.Adapter<StationPrefer
     private ViewHolder expandedViewHolder;
     private float expandDeceleration;
     private float collapseDeceleration;
+    private int bottomHeight;
 
     public StationPreferenceAdapter(Context context, List<StationPreference> items) {
         this.items = items;
@@ -41,6 +40,7 @@ public class StationPreferenceAdapter extends RecyclerView.Adapter<StationPrefer
         expandedElevation = resources.getInteger(R.integer.elevation_item);
         expandDeceleration = ((float)resources.getInteger(R.integer.animation_expand_deceleration)) / 10f;
         collapseDeceleration = ((float)resources.getInteger(R.integer.animation_collapse_deceleration)) / 10f;
+        bottomHeight = (int)resources.getDimension(R.dimen.fragment_preferences_item_bottom_height);
     }
 
     @Override
@@ -65,21 +65,29 @@ public class StationPreferenceAdapter extends RecyclerView.Adapter<StationPrefer
         holder.delete.setOnClickListener(this::onDeleteClick);
 
         boolean isItemExpanded = isExpanded(holder.preference);
+        bindExpandedLayout(holder, isItemExpanded);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            holder.itemView.setElevation(isItemExpanded ? expandedElevation : 0);
+        }
+    }
+
+    private void bindExpandedLayout(ViewHolder holder, boolean isItemExpanded) {
+        holder.itemView.getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
+        holder.getExpandedLayoutParams().setMargins(0, 0, 0, bottomHeight);
         if (isItemExpanded) {
             expandedViewHolder = holder;
             holder.expandedLayout.setVisibility(View.VISIBLE);
             holder.delete.setVisibility(View.VISIBLE);
+            holder.delete.setAlpha(1f);
             holder.status.setVisibility(View.GONE);
             holder.expand.setRotation(180f);
         } else {
             holder.expandedLayout.setVisibility(View.GONE);
             holder.delete.setVisibility(View.GONE);
             holder.status.setVisibility(View.VISIBLE);
+            holder.status.setAlpha(1f);
             holder.expand.setRotation(0f);
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            holder.itemView.setElevation(isItemExpanded ? expandedElevation : 0);
         }
     }
 
@@ -100,10 +108,14 @@ public class StationPreferenceAdapter extends RecyclerView.Adapter<StationPrefer
 
     private void onDeleteClick(View view) {
         ViewHolder holder = (ViewHolder)view.getTag(TAG_HOLDER);
-        int itemPosition = Collections.binarySearch(items, holder.preference, StationPreference::compare);
         if (listener != null) {
+            int itemPosition = findCurrentAdapterPosition(holder.preference);
             listener.onDeleteClick(itemPosition, holder.preference);
         }
+    }
+
+    private int findCurrentAdapterPosition(StationPreference preference) {
+        return Collections.binarySearch(items, preference, StationPreference::compare);
     }
 
     @Override
@@ -132,7 +144,6 @@ public class StationPreferenceAdapter extends RecyclerView.Adapter<StationPrefer
 
             final int endingHeight = holder.itemView.getHeight();
             final int distance = endingHeight - startingHeight;
-            final int bottomHeight = holder.bottomLayout.getHeight();
 
             holder.itemView.getLayoutParams().height = startingHeight;
             holder.getExpandedLayoutParams().setMargins(0, -distance, 0, bottomHeight);
@@ -148,12 +159,7 @@ public class StationPreferenceAdapter extends RecyclerView.Adapter<StationPrefer
                 holder.delete.setAlpha(value);
                 holder.itemView.requestLayout();
             }));
-            animator.addListener(AnimUtils.onEnd(() -> {
-                holder.itemView.getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
-                holder.expand.setRotation(180f);
-                holder.status.setVisibility(View.GONE);
-                holder.delete.setVisibility(View.VISIBLE);
-            }));
+            animator.addListener(AnimUtils.onEnd(() -> bindExpandedLayout(holder, true)));
 
             animator.start();
             return false;
@@ -189,12 +195,7 @@ public class StationPreferenceAdapter extends RecyclerView.Adapter<StationPrefer
                 holder.status.setAlpha(value);
                 holder.itemView.requestLayout();
             }));
-            animator.addListener(AnimUtils.onEnd(() -> {
-                holder.itemView.getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
-                holder.getExpandedLayoutParams().setMargins(0, 0, 0, bottomHeight);
-                holder.expandedLayout.setVisibility(View.GONE);
-                holder.expand.setRotation(0);
-            }));
+            animator.addListener(AnimUtils.onEnd(() -> bindExpandedLayout(holder, false)));
 
             animator.start();
 

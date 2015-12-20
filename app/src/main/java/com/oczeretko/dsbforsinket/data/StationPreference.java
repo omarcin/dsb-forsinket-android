@@ -9,6 +9,7 @@ public class StationPreference extends RealmObject{
     private int id;
     private String stationId;
     private String name;
+    private boolean notificationEnabled;
 
     public String getStationId() {
         return stationId;
@@ -36,5 +37,13 @@ public class StationPreference extends RealmObject{
 
     public static int compare(StationPreference first, StationPreference second){
         return first.getId() - second.getId();
+    }
+
+    public boolean isNotificationEnabled() {
+        return notificationEnabled;
+    }
+
+    public void setNotificationEnabled(boolean notificationEnabled) {
+        this.notificationEnabled = notificationEnabled;
     }
 }
