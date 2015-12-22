@@ -19,7 +19,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center"
-        android:layout_margin="@dimen/fab_margin"
+        android:layout_margin="@dimen/margin_fab"
         android:src="@drawable/ic_plus_white_24dp"
         app:layout_anchor="@id/fragment_preferences_recycler"
         app:layout_anchorGravity="bottom|center"

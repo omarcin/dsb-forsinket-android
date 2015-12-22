@@ -4,7 +4,9 @@ import android.animation.*;
 import android.content.*;
 import android.content.res.*;
 import android.os.*;
+import android.support.v4.content.*;
 import android.support.v7.widget.*;
+import android.text.*;
 import android.view.*;
 import android.view.animation.*;
 import android.widget.*;
@@ -24,6 +26,7 @@ public class StationPreferenceAdapter extends RecyclerView.Adapter<StationPrefer
     private final List<StationPreference> items;
     private final int animationDuration;
     private final int expandedElevation;
+    private final Resources resources;
 
     private Listener listener;
     private int expandedId;
@@ -35,7 +38,7 @@ public class StationPreferenceAdapter extends RecyclerView.Adapter<StationPrefer
 
     public StationPreferenceAdapter(Context context, List<StationPreference> items) {
         this.items = items;
-        Resources resources = context.getResources();
+        resources = context.getResources();
         animationDuration = resources.getInteger(R.integer.animation_duration_expand);
         expandedElevation = resources.getInteger(R.integer.elevation_item);
         expandDeceleration = ((float)resources.getInteger(R.integer.animation_expand_deceleration)) / 10f;
@@ -58,11 +61,28 @@ public class StationPreferenceAdapter extends RecyclerView.Adapter<StationPrefer
     public void onBindViewHolder(ViewHolder holder, int position) {
         holder.preference = items.get(position);
 
+        holder.itemView.setTag(TAG_HOLDER, holder);
+        holder.itemView.setOnClickListener(this::onExpandCollapseClick);
+
         holder.name.setText(holder.preference.getName());
         holder.expand.setTag(TAG_HOLDER, holder);
         holder.expand.setOnClickListener(this::onExpandCollapseClick);
         holder.delete.setTag(TAG_HOLDER, holder);
         holder.delete.setOnClickListener(this::onDeleteClick);
+
+        String timeHtml = resources.getString(R.string.fragment_preferences_item_times, "7:15", "11:30");
+        holder.notificationTimes.setText(Html.fromHtml(timeHtml));
+        if (holder.preference.isNotificationEnabled()) {
+            String statusString = resources.getString(R.string.status_notification_enabled, "7:15", "11:30");
+            holder.status.setText(Html.fromHtml(statusString));
+        } else {
+            holder.status.setText(R.string.status_notification_disabled);
+        }
+
+        holder.notifications.setOnCheckedChangeListener(null);
+        holder.notifications.setChecked(holder.preference.isNotificationEnabled());
+        holder.notifications.setTag(TAG_HOLDER, holder);
+        holder.notifications.setOnCheckedChangeListener(this::onNotificationCheckedChange);
 
         boolean isItemExpanded = isExpanded(holder.preference);
         bindExpandedLayout(holder, isItemExpanded);
@@ -72,10 +92,19 @@ public class StationPreferenceAdapter extends RecyclerView.Adapter<StationPrefer
         }
     }
 
+    private void onNotificationCheckedChange(View view, boolean isChecked) {
+        ViewHolder holder = (ViewHolder)view.getTag(TAG_HOLDER);
+        if (listener != null) {
+            int position = findCurrentAdapterPosition(holder.preference);
+            listener.onNotificationChange(position, holder.preference, isChecked);
+        }
+    }
+
     private void bindExpandedLayout(ViewHolder holder, boolean isItemExpanded) {
         holder.itemView.getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
-        holder.getExpandedLayoutParams().setMargins(0, 0, 0, bottomHeight);
+        holder.getExpandedLayoutParams().setMarginTop(0);
         if (isItemExpanded) {
+            holder.itemView.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), R.color.colorPreferenceAccent));
             expandedViewHolder = holder;
             holder.expandedLayout.setVisibility(View.VISIBLE);
             holder.delete.setVisibility(View.VISIBLE);
@@ -83,6 +112,7 @@ public class StationPreferenceAdapter extends RecyclerView.Adapter<StationPrefer
             holder.status.setVisibility(View.GONE);
             holder.expand.setRotation(180f);
         } else {
+            holder.itemView.setBackgroundColor(ContextCompat.getColor(holder.itemView.getContext(), android.R.color.white));
             holder.expandedLayout.setVisibility(View.GONE);
             holder.delete.setVisibility(View.GONE);
             holder.status.setVisibility(View.VISIBLE);
@@ -146,22 +176,25 @@ public class StationPreferenceAdapter extends RecyclerView.Adapter<StationPrefer
             final int distance = endingHeight - startingHeight;
 
             holder.itemView.getLayoutParams().height = startingHeight;
-            holder.getExpandedLayoutParams().setMargins(0, -distance, 0, bottomHeight);
+            holder.getExpandedLayoutParams().setMarginTop(-distance);
             holder.itemView.requestLayout();
 
-            ValueAnimator animator = ValueAnimator.ofFloat(0f, 1f).setDuration(animationDuration);
-            animator.setInterpolator(new DecelerateInterpolator(expandDeceleration));
-            animator.addUpdateListener(AnimUtils.<Float>onUpdate(value -> {
-                holder.itemView.getLayoutParams().height = (int)(value * distance + startingHeight);
-                holder.getExpandedLayoutParams().setMargins(0, (int)((value - 1) * distance), 0, bottomHeight);
-                holder.expand.setRotation(180f * value);
-                holder.status.setAlpha(1 - value);
-                holder.delete.setAlpha(value);
+            AnimatorSet set = new AnimatorSet();
+            set.setDuration(animationDuration).setInterpolator(new DecelerateInterpolator(expandDeceleration));
+            ValueAnimator itemHeight = ValueAnimator.ofInt(startingHeight, startingHeight + distance);
+            itemHeight.addUpdateListener(AnimUtils.<Integer>onUpdate(v -> {
+                holder.itemView.getLayoutParams().height = v;
                 holder.itemView.requestLayout();
             }));
-            animator.addListener(AnimUtils.onEnd(() -> bindExpandedLayout(holder, true)));
-
-            animator.start();
+            ObjectAnimator buttonRotation = ObjectAnimator.ofFloat(holder.expand, "rotation", 0f, 180f);
+            ObjectAnimator statusAlpha = ObjectAnimator.ofFloat(holder.status, "alpha", 1f, 0f);
+            ObjectAnimator deleteAlpha = ObjectAnimator.ofFloat(holder.delete, "alpha", 0f, 1f);
+            ObjectAnimator backgroundColor = AnimatorCompat.ofArgb(holder.itemView, "backgroundColor", 0, ContextCompat.getColor(holder.itemView.getContext(), R.color.colorPreferenceAccent));
+            ObjectAnimator expandMargins = ObjectAnimator.ofInt(holder.getExpandedLayoutParams(), "marginTop", -distance, 0);
+            ObjectAnimator elevation = ObjectAnimator.ofFloat(holder.itemView, "elevation", 0f, expandedElevation);
+            set.playTogether(backgroundColor, elevation, expandMargins, buttonRotation, statusAlpha, deleteAlpha, itemHeight);
+            set.addListener(AnimUtils.onEnd(() -> bindExpandedLayout(holder, true)));
+            set.start();
             return false;
         });
     }
@@ -178,27 +211,28 @@ public class StationPreferenceAdapter extends RecyclerView.Adapter<StationPrefer
 
             final int endingHeight = holder.itemView.getHeight();
             final int distance = endingHeight - startingHeight;
-            final int bottomHeight = holder.bottomLayout.getHeight();
 
             holder.expandedLayout.setVisibility(View.VISIBLE);
             holder.delete.setVisibility(View.GONE);
             holder.status.setVisibility(View.VISIBLE);
-            holder.status.setAlpha(1);
+            holder.status.setAlpha(1f);
 
-            ValueAnimator animator = ValueAnimator.ofFloat(0f, 1f).setDuration(animationDuration);
-            animator.setInterpolator(new DecelerateInterpolator(collapseDeceleration));
-            animator.addUpdateListener(AnimUtils.<Float>onUpdate(value -> {
-                holder.itemView.getLayoutParams().height = (int)(value * distance + startingHeight);
-                holder.getExpandedLayoutParams().setMargins(0, (int)(value * distance), 0, bottomHeight);
-                holder.expand.setRotation(180f * (1 - value));
-                holder.delete.setAlpha(1 - value);
-                holder.status.setAlpha(value);
+            AnimatorSet set = new AnimatorSet();
+            set.setDuration(animationDuration).setInterpolator(new DecelerateInterpolator(collapseDeceleration));
+            ValueAnimator itemHeight = ValueAnimator.ofInt(startingHeight, startingHeight + distance);
+            itemHeight.addUpdateListener(AnimUtils.<Integer>onUpdate(v -> {
+                holder.itemView.getLayoutParams().height = v;
                 holder.itemView.requestLayout();
             }));
-            animator.addListener(AnimUtils.onEnd(() -> bindExpandedLayout(holder, false)));
-
-            animator.start();
-
+            ObjectAnimator buttonRotation = ObjectAnimator.ofFloat(holder.expand, "rotation", 0f);
+            ObjectAnimator statusAlpha = ObjectAnimator.ofFloat(holder.status, "alpha", 1f);
+            ObjectAnimator deleteAlpha = ObjectAnimator.ofFloat(holder.delete, "alpha", 0f);
+            ObjectAnimator backgroundColor = AnimatorCompat.ofArgb(holder.itemView, "backgroundColor", ContextCompat.getColor(holder.itemView.getContext(), R.color.colorPreferenceAccent), 0);
+            ObjectAnimator expandMargins = ObjectAnimator.ofInt(holder.getExpandedLayoutParams(), "marginTop", -distance, 0);
+            ObjectAnimator itemElevation = ObjectAnimator.ofFloat(holder.itemView, "elevation", expandedElevation, 0f);
+            set.playTogether(backgroundColor, itemElevation, expandMargins, buttonRotation, statusAlpha, deleteAlpha, itemHeight);
+            set.addListener(AnimUtils.onEnd(() -> bindExpandedLayout(holder, false)));
+            set.start();
             return false;
         });
     }
@@ -214,7 +248,9 @@ public class StationPreferenceAdapter extends RecyclerView.Adapter<StationPrefer
         protected final View bottomLayout;
         protected final ImageButton expand;
         protected final ImageButton delete;
-        protected final View status;
+        protected final TextView status;
+        protected final CheckBox notifications;
+        protected final Button notificationTimes;
         protected StationPreference preference;
 
         public ViewHolder(View itemView) {
@@ -225,15 +261,18 @@ public class StationPreferenceAdapter extends RecyclerView.Adapter<StationPrefer
             bottomLayout = itemView.findViewById(R.id.fragment_preferences_item_bottom_layout);
             expand = (ImageButton)itemView.findViewById(R.id.fragment_preferences_item_expand_btn);
             delete = (ImageButton)itemView.findViewById(R.id.fragment_preferences_item_delete_btn);
-            status = itemView.findViewById(R.id.fragment_preferences_item_notification_status);
+            status = (TextView)itemView.findViewById(R.id.fragment_preferences_item_notification_status);
+            notifications = (CheckBox)itemView.findViewById(R.id.fragment_preferences_item_notifications);
+            notificationTimes = (Button)itemView.findViewById(R.id.fragment_preferences_item_times);
         }
 
-        public FrameLayout.LayoutParams getExpandedLayoutParams() {
-            return (FrameLayout.LayoutParams)expandedLayout.getLayoutParams();
+        public LayoutParamsWrapper getExpandedLayoutParams() {
+            return LayoutParamsWrapper.from(expandedLayout.getLayoutParams());
         }
     }
 
     public interface Listener {
         void onDeleteClick(int adapterPosition, StationPreference preference);
+        void onNotificationChange(int adapterPosition, StationPreference preference, boolean isEnabled);
     }
 }

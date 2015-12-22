@@ -96,4 +96,13 @@ public class PreferencesFragment extends Fragment implements StationPreferenceAd
         realm.commitTransaction();
         adapter.notifyItemRemoved(adapterPosition);
     }
+
+    @Override
+    public void onNotificationChange(int adapterPosition, StationPreference preference, boolean isEnabled) {
+        realm.beginTransaction();
+        preference.setNotificationEnabled(isEnabled);
+        realm.copyToRealmOrUpdate(preference);
+        realm.commitTransaction();
+        adapter.notifyItemChanged(adapterPosition);
+    }
 }

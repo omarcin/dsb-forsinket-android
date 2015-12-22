@@ -3,21 +3,22 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
 
-    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="margin_fab">16dp</dimen>
 
-    <dimen name="big_margin">32dp</dimen>
-    <dimen name="default_margin">16dp</dimen>
-    <dimen name="small_margin">10dp</dimen>
-    <dimen name="tiny_margin">2sp</dimen>
+    <dimen name="margin_big">32dp</dimen>
+    <dimen name="margin_default">16dp</dimen>
+    <dimen name="margin_small">10dp</dimen>
+    <dimen name="margin_tiny">2sp</dimen>
 
     <dimen name="list_item_height">32sp</dimen>
     <dimen name="fragment_preferences_item_bottom_height">48dp</dimen>
 
     <dimen name="radius">8dp</dimen>
 
-    <dimen name="departures_font_size">22sp</dimen>
-    <dimen name="stations_font_size">36sp</dimen>
-    <dimen name="small_font_size">16sp</dimen>
-    <dimen name="tiny_font_size">12sp</dimen>
+    <dimen name="font_size_departures">22sp</dimen>
+    <dimen name="font_size_preferences_stations">36sp</dimen>
+    <dimen name="font_size_preferences_settings">24sp</dimen>
+    <dimen name="font_size_small">16sp</dimen>
+    <dimen name="font_size_tiny">12sp</dimen>
 
 </resources>

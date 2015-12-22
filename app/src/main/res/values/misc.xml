@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <integer name="notification_snooze_time_minutes">60</integer>
-    <integer name="snackbar_first_visit_delay_millis">2500</integer>
+    <integer name="snackbar_first_visit_delay_millis">1250</integer>
     <integer name="pager_offscreen_limit">2</integer>
-    <integer name="animation_duration_expand">350</integer>
+    <integer name="animation_duration_expand">300</integer>
     <integer name="elevation_item">8</integer>
     <integer name="animation_expand_deceleration">10</integer>
-    <integer name="animation_collapse_deceleration">5</integer>
+    <integer name="animation_collapse_deceleration">7</integer>
 
     <string name="id_00">00</string>
     <string name="id_01">01</string>

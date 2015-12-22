@@ -5,6 +5,10 @@
     <color name="colorAccent">#FF4081</color>
     <color name="colorError">#FF3051</color>
     <color name="colorOddRow">#223F51B5</color>
+    <color name="colorPreferenceAccent">#333F51B5</color>
+
+    <color name="white">#FFFFFF</color>
+
 
     <color name="line_a">#7700B6E3</color>
     <color name="line_b">#773CB94E</color>

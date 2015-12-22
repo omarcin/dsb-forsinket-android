@@ -11,6 +11,7 @@ import android.support.v7.app.AlertDialog;
 import android.view.*;
 import android.widget.*;
 
+import com.oczeretko.dsbforsinket.*;
 import com.oczeretko.dsbforsinket.utils.*;
 
 import java.util.*;
@@ -24,7 +25,7 @@ public class StationPickerFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("TITLE");
+        builder.setTitle(R.string.preferences_station_picker_title);
         builder.setCancelable(true);
 
         List<Pair<String, String>> stationNames = Stations.getStations(getContext());

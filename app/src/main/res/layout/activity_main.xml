@@ -37,7 +37,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="right"
                     android:visibility="gone"
-                    android:layout_margin="@dimen/small_margin"
+                    android:layout_margin="@dimen/margin_small"
                     />
 
             </android.support.v7.widget.Toolbar>

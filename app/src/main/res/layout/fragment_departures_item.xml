@@ -3,20 +3,19 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="@dimen/list_item_height"
-    android:paddingEnd="@dimen/small_margin"
-    android:paddingLeft="@dimen/small_margin"
-    android:paddingRight="@dimen/small_margin"
-    android:paddingStart="@dimen/small_margin"
-    android:paddingBottom="@dimen/tiny_margin"
-    android:paddingTop="@dimen/tiny_margin"
+    android:paddingLeft="@dimen/margin_small"
+    android:paddingRight="@dimen/margin_small"
+    android:paddingStart="@dimen/margin_small"
+    android:paddingBottom="@dimen/margin_tiny"
+    android:paddingTop="@dimen/margin_tiny"
     >
 
     <com.oczeretko.dsbforsinket.view.SquareLayout
         android:id="@+id/trainLineLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginRight="@dimen/small_margin"
-        android:layout_marginEnd="@dimen/small_margin"
+        android:layout_marginRight="@dimen/margin_small"
+        android:layout_marginEnd="@dimen/margin_small"
         android:background="@drawable/line_a"
         >
         <TextView
@@ -46,6 +45,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
         android:text="12:34">
     </TextView>
 
@@ -55,7 +55,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginRight="5dp"
+        android:layout_marginEnd="5dp"
         android:layout_toLeftOf="@id/departureTime"
+        android:layout_toStartOf="@id/departureTime"
         android:textColor="@color/colorAccent">
     </TextView>
 
