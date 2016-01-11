@@ -2,8 +2,8 @@
 <resources>
 
     <string-array name="stations_default">
-        <item>8600626</item>
         <item>8600646</item>
+        <item>8600626</item>
     </string-array>
     
     <string-array name="stations_uics">

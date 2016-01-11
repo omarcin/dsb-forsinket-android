@@ -16,14 +16,16 @@ import android.widget.*;
 
 import com.oczeretko.dsbforsinket.*;
 import com.oczeretko.dsbforsinket.R;
+import com.oczeretko.dsbforsinket.data.*;
 import com.oczeretko.dsbforsinket.fragment.*;
 import com.oczeretko.dsbforsinket.receivers.*;
 import com.oczeretko.dsbforsinket.utils.*;
 
+import io.realm.*;
+
 import static com.oczeretko.dsbforsinket.utils.CollectionsUtils.*;
 
-public class MainActivity extends AppCompatActivity
-    implements NavigationView.OnNavigationItemSelectedListener, SharedPreferences.OnSharedPreferenceChangeListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, RealmChangeListener {
 
     private static final String TAG = "MainActivity";
     private static final String TAG_FRAGMENT = "Fragment";
@@ -42,12 +44,19 @@ public class MainActivity extends AppCompatActivity
     private Class<? extends Fragment> currentFragmentClass;
 
     private BroadcastReceiver registrationBroadcastReceiver;
+    private Realm realm;
+    private RealmResults<StationPreference> stations;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+        Stations.createDefaultIfNeeded(this);
         setContentView(R.layout.activity_main);
+
+        realm = Realm.getInstance(this);
+        stations = realm.where(StationPreference.class).findAllSorted("id");
+        stations.addChangeListener(this);
 
         findViews();
         setupViews();
@@ -57,6 +66,13 @@ public class MainActivity extends AppCompatActivity
         if (!checkSettingsVisited()) {
             showIntroSnackbarDelayed();
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        stations.removeChangeListeners();
+        realm.close();
     }
 
     private void findViews() {
@@ -77,9 +93,10 @@ public class MainActivity extends AppCompatActivity
 
     private void setupDrawerMenu() {
         SubMenu departuresSubMenu = navigationView.getMenu().findItem(R.id.drawer_departures).getSubMenu();
-        String[] stationIds = Stations.getSelectedStationIds(this);
-        for (int i = 0; i < stationIds.length && i < Consts.IDS.length; i++) {
-            departuresSubMenu.add(0, Consts.IDS[i], 0, Stations.getStationNameById(this, stationIds[i]));
+        departuresSubMenu.clear();
+
+        for (int i = 0; i < stations.size() && i < Consts.IDS.length; i++) {
+            departuresSubMenu.add(0, Consts.IDS[i], 0, stations.get(i).getName());
         }
     }
 
@@ -125,7 +142,6 @@ public class MainActivity extends AppCompatActivity
         LocalBroadcastManager.getInstance(this)
                              .registerReceiver(registrationBroadcastReceiver,
                                                new IntentFilter(Consts.INTENT_ACTION_REGISTRATION_UPDATE));
-        PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(this);
     }
 
     @Override
@@ -133,7 +149,6 @@ public class MainActivity extends AppCompatActivity
         LocalBroadcastManager.getInstance(this)
                              .unregisterReceiver(registrationBroadcastReceiver);
         registrationBroadcastReceiver = null;
-        PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(this);
         super.onPause();
     }
 
@@ -144,13 +159,6 @@ public class MainActivity extends AppCompatActivity
             showFragment(PreferencesFragment.class);
         } else {
             showFragment(DeparturesPagerFragment.class);
-        }
-    }
-
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (key.equals(getString(R.string.preferences_stations_key))) {
-            setupDrawerMenu();
         }
     }
 
@@ -219,5 +227,10 @@ public class MainActivity extends AppCompatActivity
 
     private Fragment getShownFragment() {
         return getSupportFragmentManager().findFragmentByTag(TAG_FRAGMENT);
+    }
+
+    @Override
+    public void onChange() {
+        setupDrawerMenu();
     }
 }

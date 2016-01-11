@@ -9,7 +9,12 @@ import android.support.v4.view.*;
 import android.view.*;
 
 import com.oczeretko.dsbforsinket.*;
+import com.oczeretko.dsbforsinket.data.*;
 import com.oczeretko.dsbforsinket.utils.*;
+
+import java.util.*;
+
+import io.realm.*;
 
 public class DeparturesPagerFragment extends Fragment {
 
@@ -20,7 +25,10 @@ public class DeparturesPagerFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        String[] stationIds = Stations.getSelectedStationIds(getContext());
+        Realm realm = Realm.getInstance(getContext());
+        List<String> stationIds = CollectionsUtils.map(realm.where(StationPreference.class).findAllSorted("id"),
+                                                       station -> station.getStationId());
+        realm.close();
         adapter = new DeparturesPagerAdapter(getContext(), getChildFragmentManager(), stationIds);
     }
 
@@ -44,9 +52,9 @@ public class DeparturesPagerFragment extends Fragment {
     private static class DeparturesPagerAdapter extends FragmentStatePagerAdapter {
 
         private final Context context;
-        private final String[] stationIds;
+        private final List<String> stationIds;
 
-        public DeparturesPagerAdapter(Context context, FragmentManager fm, String[] stationIds) {
+        public DeparturesPagerAdapter(Context context, FragmentManager fm, List<String> stationIds) {
             super(fm);
             this.context = context;
             this.stationIds = stationIds;
@@ -54,17 +62,17 @@ public class DeparturesPagerFragment extends Fragment {
 
         @Override
         public Fragment getItem(int position) {
-            return DeparturesFragment.newInstance(stationIds[position]);
+            return DeparturesFragment.newInstance(stationIds.get(position));
         }
 
         @Override
         public int getCount() {
-            return stationIds.length;
+            return stationIds.size();
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
-            return Stations.getStationNameById(context, stationIds[position]);
+            return Stations.getStationNameById(context, stationIds.get(position));
         }
     }
 }

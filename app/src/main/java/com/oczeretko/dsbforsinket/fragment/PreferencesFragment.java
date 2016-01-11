@@ -47,10 +47,7 @@ public class PreferencesFragment extends Fragment implements StationPreferenceAd
     @Override
     public void onStart() {
         super.onStart();
-        RealmConfiguration configuration = new RealmConfiguration.Builder(getActivity())
-                                               .deleteRealmIfMigrationNeeded()
-                                               .build();
-        realm = Realm.getInstance(configuration);
+        realm = Realm.getInstance(getContext());
         RealmResults<StationPreference> stations = realm.where(StationPreference.class).findAllSorted("id");
         adapter.setStations(stations);
     }
