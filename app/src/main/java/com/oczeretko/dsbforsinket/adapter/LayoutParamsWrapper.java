@@ -5,17 +5,13 @@ import android.widget.*;
 
 public class LayoutParamsWrapper {
 
-    private final FrameLayout.LayoutParams layoutParams;
+    private final ViewGroup.LayoutParams layoutParams;
 
     public static LayoutParamsWrapper from(ViewGroup.LayoutParams layoutParams) {
-        return from((FrameLayout.LayoutParams)layoutParams);
-    }
-
-    public static LayoutParamsWrapper from(FrameLayout.LayoutParams layoutParams) {
         return new LayoutParamsWrapper(layoutParams);
     }
 
-    public LayoutParamsWrapper(FrameLayout.LayoutParams layoutParams) {
+    public LayoutParamsWrapper(ViewGroup.LayoutParams layoutParams) {
         this.layoutParams = layoutParams;
     }
 
@@ -36,18 +32,18 @@ public class LayoutParamsWrapper {
     }
 
     public int getMarginTop() {
-        return layoutParams.topMargin;
+        return ((FrameLayout.LayoutParams)layoutParams).topMargin;
     }
 
     public void setMarginTop(int marginTop) {
-        layoutParams.topMargin = marginTop;
+        ((FrameLayout.LayoutParams)layoutParams).topMargin = marginTop;
     }
 
     public int getMarginBottom() {
-        return layoutParams.bottomMargin;
+        return ((FrameLayout.LayoutParams)layoutParams).bottomMargin;
     }
 
     public void setMarginBottom(int bottomMargin) {
-        layoutParams.bottomMargin = bottomMargin;
+        ((FrameLayout.LayoutParams)layoutParams).bottomMargin = bottomMargin;
     }
 }

@@ -28,6 +28,10 @@ public class PreferencesFragment extends Fragment implements StationPreferenceAd
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
+        android.preference.PreferenceManager.getDefaultSharedPreferences(getActivity())
+                                            .edit()
+                                            .putBoolean(Consts.PREF_VISITED_SETTINGS, true)
+                                            .commit();
     }
 
     @Override
@@ -36,6 +40,7 @@ public class PreferencesFragment extends Fragment implements StationPreferenceAd
         addButton = (FloatingActionButton)view.findViewById(R.id.fragment_preferences_add);
         addButton.setOnClickListener(this::onAddClick);
         recycler = (RecyclerView)view.findViewById(R.id.fragment_preferences_recycler);
+        setupRecyclerView();
         return view;
     }
 
@@ -46,7 +51,8 @@ public class PreferencesFragment extends Fragment implements StationPreferenceAd
                                                .deleteRealmIfMigrationNeeded()
                                                .build();
         realm = Realm.getInstance(configuration);
-        setupRecyclerView();
+        RealmResults<StationPreference> stations = realm.where(StationPreference.class).findAllSorted("id");
+        adapter.setStations(stations);
     }
 
     @Override
@@ -59,8 +65,7 @@ public class PreferencesFragment extends Fragment implements StationPreferenceAd
 
     private void setupRecyclerView() {
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
-        RealmResults<StationPreference> stations = realm.where(StationPreference.class).findAllSorted("id");
-        adapter = new StationPreferenceAdapter(getContext(), stations);
+        adapter = new StationPreferenceAdapter(getContext());
         adapter.setListener(this);
         recycler.setLayoutManager(layoutManager);
         recycler.setAdapter(adapter);

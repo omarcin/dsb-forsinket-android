@@ -5,6 +5,7 @@ import android.content.*;
 import android.content.res.*;
 import android.os.*;
 import android.support.v4.content.*;
+import android.support.v4.view.*;
 import android.support.v7.widget.*;
 import android.text.*;
 import android.view.*;
@@ -23,7 +24,7 @@ public class StationPreferenceAdapter extends RecyclerView.Adapter<StationPrefer
     private static final int LAYOUT_RESOURCE = R.layout.fragment_preferences_item;
     private static final int TAG_HOLDER = R.string.tag_holder;
 
-    private final List<StationPreference> items;
+    private List<StationPreference> items = new ArrayList<>();
     private final int animationDuration;
     private final int expandedElevation;
     private final Resources resources;
@@ -34,16 +35,13 @@ public class StationPreferenceAdapter extends RecyclerView.Adapter<StationPrefer
     private ViewHolder expandedViewHolder;
     private float expandDeceleration;
     private float collapseDeceleration;
-    private int bottomHeight;
 
-    public StationPreferenceAdapter(Context context, List<StationPreference> items) {
-        this.items = items;
+    public StationPreferenceAdapter(Context context) {
         resources = context.getResources();
         animationDuration = resources.getInteger(R.integer.animation_duration_expand);
         expandedElevation = resources.getInteger(R.integer.elevation_item);
         expandDeceleration = ((float)resources.getInteger(R.integer.animation_expand_deceleration)) / 10f;
         collapseDeceleration = ((float)resources.getInteger(R.integer.animation_collapse_deceleration)) / 10f;
-        bottomHeight = (int)resources.getDimension(R.dimen.fragment_preferences_item_bottom_height);
     }
 
     @Override
@@ -178,14 +176,12 @@ public class StationPreferenceAdapter extends RecyclerView.Adapter<StationPrefer
             holder.itemView.getLayoutParams().height = startingHeight;
             holder.getExpandedLayoutParams().setMarginTop(-distance);
             holder.itemView.requestLayout();
+            ViewCompat.setHasTransientState(holder.itemView, true);
 
             AnimatorSet set = new AnimatorSet();
             set.setDuration(animationDuration).setInterpolator(new DecelerateInterpolator(expandDeceleration));
-            ValueAnimator itemHeight = ValueAnimator.ofInt(startingHeight, startingHeight + distance);
-            itemHeight.addUpdateListener(AnimUtils.<Integer>onUpdate(v -> {
-                holder.itemView.getLayoutParams().height = v;
-                holder.itemView.requestLayout();
-            }));
+            ObjectAnimator itemHeight = ObjectAnimator.ofInt(LayoutParamsWrapper.from(holder.itemView.getLayoutParams()), "height", startingHeight, startingHeight + distance);
+            itemHeight.addUpdateListener(AnimUtils.onUpdate(holder.itemView::requestLayout));
             ObjectAnimator buttonRotation = ObjectAnimator.ofFloat(holder.expand, "rotation", 0f, 180f);
             ObjectAnimator statusAlpha = ObjectAnimator.ofFloat(holder.status, "alpha", 1f, 0f);
             ObjectAnimator deleteAlpha = ObjectAnimator.ofFloat(holder.delete, "alpha", 0f, 1f);
@@ -193,7 +189,10 @@ public class StationPreferenceAdapter extends RecyclerView.Adapter<StationPrefer
             ObjectAnimator expandMargins = ObjectAnimator.ofInt(holder.getExpandedLayoutParams(), "marginTop", -distance, 0);
             ObjectAnimator elevation = ObjectAnimator.ofFloat(holder.itemView, "elevation", 0f, expandedElevation);
             set.playTogether(backgroundColor, elevation, expandMargins, buttonRotation, statusAlpha, deleteAlpha, itemHeight);
-            set.addListener(AnimUtils.onEnd(() -> bindExpandedLayout(holder, true)));
+            set.addListener(AnimUtils.onEnd(() -> {
+                bindExpandedLayout(holder, true);
+                ViewCompat.setHasTransientState(holder.itemView, false);
+            }));
             set.start();
             return false;
         });
@@ -216,14 +215,12 @@ public class StationPreferenceAdapter extends RecyclerView.Adapter<StationPrefer
             holder.delete.setVisibility(View.GONE);
             holder.status.setVisibility(View.VISIBLE);
             holder.status.setAlpha(1f);
+            ViewCompat.setHasTransientState(holder.itemView, true);
 
             AnimatorSet set = new AnimatorSet();
             set.setDuration(animationDuration).setInterpolator(new DecelerateInterpolator(collapseDeceleration));
-            ValueAnimator itemHeight = ValueAnimator.ofInt(startingHeight, startingHeight + distance);
-            itemHeight.addUpdateListener(AnimUtils.<Integer>onUpdate(v -> {
-                holder.itemView.getLayoutParams().height = v;
-                holder.itemView.requestLayout();
-            }));
+            ObjectAnimator itemHeight = ObjectAnimator.ofInt(LayoutParamsWrapper.from(holder.itemView.getLayoutParams()), "height", startingHeight, startingHeight + distance);
+            itemHeight.addUpdateListener(AnimUtils.onUpdate(holder.itemView::requestLayout));
             ObjectAnimator buttonRotation = ObjectAnimator.ofFloat(holder.expand, "rotation", 0f);
             ObjectAnimator statusAlpha = ObjectAnimator.ofFloat(holder.status, "alpha", 1f);
             ObjectAnimator deleteAlpha = ObjectAnimator.ofFloat(holder.delete, "alpha", 0f);
@@ -231,7 +228,10 @@ public class StationPreferenceAdapter extends RecyclerView.Adapter<StationPrefer
             ObjectAnimator expandMargins = ObjectAnimator.ofInt(holder.getExpandedLayoutParams(), "marginTop", -distance, 0);
             ObjectAnimator itemElevation = ObjectAnimator.ofFloat(holder.itemView, "elevation", expandedElevation, 0f);
             set.playTogether(backgroundColor, itemElevation, expandMargins, buttonRotation, statusAlpha, deleteAlpha, itemHeight);
-            set.addListener(AnimUtils.onEnd(() -> bindExpandedLayout(holder, false)));
+            set.addListener(AnimUtils.onEnd(() -> {
+                bindExpandedLayout(holder, false);
+                ViewCompat.setHasTransientState(holder.itemView, false);
+            }));
             set.start();
             return false;
         });
@@ -239,6 +239,11 @@ public class StationPreferenceAdapter extends RecyclerView.Adapter<StationPrefer
 
     public void setListener(Listener listener) {
         this.listener = listener;
+    }
+
+    public void setStations(List<StationPreference> stations) {
+        items = stations;
+        notifyDataSetChanged();
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
@@ -273,6 +278,7 @@ public class StationPreferenceAdapter extends RecyclerView.Adapter<StationPrefer
 
     public interface Listener {
         void onDeleteClick(int adapterPosition, StationPreference preference);
+
         void onNotificationChange(int adapterPosition, StationPreference preference, boolean isEnabled);
     }
 }
