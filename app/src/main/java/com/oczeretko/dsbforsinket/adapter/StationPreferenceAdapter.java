@@ -142,6 +142,10 @@ public class StationPreferenceAdapter extends RecyclerView.Adapter<StationPrefer
         }
     }
 
+    public void notifyItemChanged(StationPreference previousStation) {
+        notifyItemChanged(findCurrentAdapterPosition(previousStation));
+    }
+
     private int findCurrentAdapterPosition(StationPreference preference) {
         return Collections.binarySearch(items, preference, StationPreference::compare);
     }

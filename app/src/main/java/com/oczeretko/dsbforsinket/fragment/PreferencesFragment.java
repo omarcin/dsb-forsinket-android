@@ -1,28 +1,42 @@
 package com.oczeretko.dsbforsinket.fragment;
 
 
+import android.content.*;
 import android.os.*;
 import android.support.annotation.*;
 import android.support.design.widget.*;
 import android.support.v4.app.*;
+import android.support.v7.preference.*;
 import android.support.v7.widget.*;
+import android.util.*;
 import android.view.*;
+import android.widget.*;
 
+import com.google.android.gms.common.*;
 import com.oczeretko.dsbforsinket.*;
+import com.oczeretko.dsbforsinket.R;
 import com.oczeretko.dsbforsinket.adapter.*;
 import com.oczeretko.dsbforsinket.data.*;
+import com.oczeretko.dsbforsinket.gcm.*;
 import com.oczeretko.dsbforsinket.oss.*;
 import com.oczeretko.dsbforsinket.utils.*;
 
 import io.realm.*;
 
-public class PreferencesFragment extends Fragment implements StationPreferenceAdapter.Listener {
+import static com.oczeretko.dsbforsinket.utils.CollectionsUtils.*;
+
+public class PreferencesFragment extends Fragment implements StationPreferenceAdapter.Listener, RealmChangeListener {
+
+    private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
+    private static final String TAG = "SettingsFragment";
 
     private static final String TAG_STATION_PICKER = "STATIONS";
     private RecyclerView recycler;
     private FloatingActionButton addButton;
     private Realm realm;
+    private RealmResults<StationPreference> stations;
     private StationPreferenceAdapter adapter;
+    private ProgressBar toolbarLoadingIndicator;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -32,6 +46,7 @@ public class PreferencesFragment extends Fragment implements StationPreferenceAd
                                             .edit()
                                             .putBoolean(Consts.PREF_VISITED_SETTINGS, true)
                                             .commit();
+        toolbarLoadingIndicator = (ProgressBar)getActivity().findViewById(R.id.main_activity_toolbar_progress_bar);
     }
 
     @Override
@@ -48,7 +63,8 @@ public class PreferencesFragment extends Fragment implements StationPreferenceAd
     public void onStart() {
         super.onStart();
         realm = Realm.getInstance(getContext());
-        RealmResults<StationPreference> stations = realm.where(StationPreference.class).findAllSorted("id");
+        stations = realm.where(StationPreference.class).findAllSorted("id");
+        stations.addChangeListener(this);
         adapter.setStations(stations);
     }
 
@@ -57,6 +73,7 @@ public class PreferencesFragment extends Fragment implements StationPreferenceAd
         super.onStop();
         recycler.setAdapter(null);
         adapter = null;
+        stations.removeChangeListener(this);
         realm.close();
     }
 
@@ -102,9 +119,55 @@ public class PreferencesFragment extends Fragment implements StationPreferenceAd
     @Override
     public void onNotificationChange(int adapterPosition, StationPreference preference, boolean isEnabled) {
         realm.beginTransaction();
+
+        if (isEnabled) {
+            StationPreference previousStation = realm.where(StationPreference.class).equalTo("notificationEnabled", true).findFirst();
+            if (previousStation != null) {
+                previousStation.setNotificationEnabled(false);
+            }
+            adapter.notifyItemChanged(previousStation);
+        }
+
         preference.setNotificationEnabled(isEnabled);
         realm.copyToRealmOrUpdate(preference);
         realm.commitTransaction();
         adapter.notifyItemChanged(adapterPosition);
+    }
+
+    @Override
+    public void onChange() {
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+
+        if (sharedPreferences.getBoolean(Consts.PREF_UNHANDLED_REGISTRATION_ERROR, false)) {
+            // TODO: implement some sort of value clearing on error
+            // CheckBoxPreference cbp = (CheckBoxPreference)findPreference(getString(R.string.preferences_notification_key));
+            // cbp.setChecked(sharedPreferences.getBoolean(keyNotification, false));
+            return;
+        }
+
+        StationPreference stationToNotify = firstOrNull(stations, s -> s.isNotificationEnabled());
+        if (stationToNotify != null && checkPlayServices(true)) {
+            String[] times = {"8:00", "8:15", "8:30", "8:45", "9:00", "10:45"}; // TODO
+            GcmRegistrationIntentService.requestRegistration(getActivity(), stationToNotify.getStationId(), times);
+            toolbarLoadingIndicator.setVisibility(View.VISIBLE);
+        } else if (sharedPreferences.getBoolean(Consts.PREF_POSSIBLY_REGISTERED, false) && checkPlayServices(false)) {
+            GcmRegistrationIntentService.requestDeregistration(getActivity());
+            toolbarLoadingIndicator.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private boolean checkPlayServices(boolean showErrorDialog) {
+        GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
+        int resultCode = apiAvailability.isGooglePlayServicesAvailable(getActivity());
+        if (resultCode != ConnectionResult.SUCCESS && showErrorDialog) {
+            if (apiAvailability.isUserResolvableError(resultCode)) {
+                apiAvailability.getErrorDialog(getActivity(), resultCode, PLAY_SERVICES_RESOLUTION_REQUEST)
+                               .show();
+            } else {
+                Log.i(TAG, "This device is not supported.");
+            }
+            return false;
+        }
+        return true;
     }
 }
