@@ -65,7 +65,10 @@ public class PreferencesFragment extends Fragment implements StationPreferenceAd
         realm = Realm.getInstance(getContext());
         stations = realm.where(StationPreference.class).findAllSorted("id");
         stations.addChangeListener(this);
+        adapter = new StationPreferenceAdapter(getContext());
         adapter.setStations(stations);
+        adapter.setListener(this);
+        recycler.setAdapter(adapter);
     }
 
     @Override
@@ -79,11 +82,7 @@ public class PreferencesFragment extends Fragment implements StationPreferenceAd
 
     private void setupRecyclerView() {
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
-        adapter = new StationPreferenceAdapter(getContext());
-        adapter.setListener(this);
         recycler.setLayoutManager(layoutManager);
-        recycler.setAdapter(adapter);
-
         RecyclerView.ItemDecoration itemDecoration = new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL_LIST);
         recycler.addItemDecoration(itemDecoration);
     }
