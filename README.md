@@ -1,8 +1,8 @@
 TODO: some description
 
-![Main screen](meta/screenshot1.jpg?raw=true "Main screen")
-![Menu](meta/screenshot2.jpg?raw=true "Menu")
-![Settings](meta/screenshot3.jpg?raw=true "Settings")
+![Main screen](meta/screenshot1.png?raw=true "Main screen")
+![Menu](meta/screenshot2.png?raw=true "Menu")
+![Settings](meta/screenshot3.png?raw=true "Settings")
 
 
 
