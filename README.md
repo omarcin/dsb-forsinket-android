@@ -1,5 +1,11 @@
 TODO: some description
 
+![Main screen](meta/screenshot1.jpg?raw=true "Main screen")
+![Menu](meta/screenshot2.jpg?raw=true "Menu")
+![Settings](meta/screenshot3.jpg?raw=true "Settings")
+
+
+
 Material icons under the [CC-BY](https://creativecommons.org/licenses/by/4.0/) license.
 
 Application icon generated with Android Asset Studio, licensed under [Creative Commons Attribution 3.0 Unported License](http://creativecommons.org/licenses/by/3.0/)
