@@ -4,6 +4,8 @@ Material icons under the [CC-BY](https://creativecommons.org/licenses/by/4.0/) l
 
 Application icon generated with Android Asset Studio, licensed under [Creative Commons Attribution 3.0 Unported License](http://creativecommons.org/licenses/by/3.0/)
 
+Some files (indicated by an appropriate copyright header) are licensed under [Apache License](http://www.apache.org/licenses/LICENSE-2.0), Copyright 2015 The Android Open Source Project
+
 The MIT License (MIT)
 
 Copyright (c) 2016 Marcin Oczeretko
