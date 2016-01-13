@@ -14,8 +14,10 @@ import com.google.android.gms.iid.*;
 import com.oczeretko.dsbforsinket.*;
 import com.oczeretko.dsbforsinket.R;
 import com.oczeretko.dsbforsinket.activity.*;
+import com.oczeretko.dsbforsinket.data.*;
 import com.oczeretko.dsbforsinket.receivers.*;
-import com.oczeretko.dsbforsinket.utils.*;
+
+import io.realm.*;
 
 public class GcmRegistrationIntentService extends IntentService {
 
@@ -113,8 +115,16 @@ public class GcmRegistrationIntentService extends IntentService {
                              .putBoolean(Consts.PREF_REGISTRATION_ERROR, true)
                              .putBoolean(Consts.PREF_UNHANDLED_REGISTRATION_ERROR, true)
                              .putBoolean(Consts.PREF_POSSIBLY_REGISTERED, true)
-                             .putBoolean(getString(R.string.preferences_notification_key), false)
                              .apply();
+
+            Realm realm = Realm.getInstance(this);
+            StationPreference previousStation = realm.where(StationPreference.class).equalTo("notificationEnabled", true).findFirst();
+            if (previousStation != null) {
+                realm.beginTransaction();
+                previousStation.setNotificationEnabled(false);
+                realm.commitTransaction();
+            }
+            realm.close();
 
             requestErrorNotification(this);
         }

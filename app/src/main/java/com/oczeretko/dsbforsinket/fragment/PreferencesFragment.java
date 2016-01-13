@@ -25,7 +25,7 @@ import io.realm.*;
 
 import static com.oczeretko.dsbforsinket.utils.CollectionsUtils.*;
 
-public class PreferencesFragment extends Fragment implements StationPreferenceAdapter.Listener, RealmChangeListener {
+public class PreferencesFragment extends Fragment implements StationPreferenceAdapter.Listener, RealmChangeListener, SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     private static final String TAG = "SettingsFragment";
@@ -69,6 +69,8 @@ public class PreferencesFragment extends Fragment implements StationPreferenceAd
         adapter.setStations(stations);
         adapter.setListener(this);
         recycler.setAdapter(adapter);
+        PreferenceManager.getDefaultSharedPreferences(getContext())
+                         .registerOnSharedPreferenceChangeListener(this);
     }
 
     @Override
@@ -78,6 +80,8 @@ public class PreferencesFragment extends Fragment implements StationPreferenceAd
         adapter = null;
         stations.removeChangeListener(this);
         realm.close();
+        PreferenceManager.getDefaultSharedPreferences(getContext())
+                         .unregisterOnSharedPreferenceChangeListener(this);
     }
 
     private void setupRecyclerView() {
@@ -117,39 +121,36 @@ public class PreferencesFragment extends Fragment implements StationPreferenceAd
 
     @Override
     public void onNotificationChange(int adapterPosition, StationPreference preference, boolean isEnabled) {
-        realm.beginTransaction();
 
         if (isEnabled) {
-            StationPreference previousStation = realm.where(StationPreference.class).equalTo("notificationEnabled", true).findFirst();
-            if (previousStation != null) {
-                previousStation.setNotificationEnabled(false);
-            }
-            adapter.notifyItemChanged(previousStation);
+            uncheckCurrentlyCheckedNotification();
         }
 
+        realm.beginTransaction();
         preference.setNotificationEnabled(isEnabled);
         realm.copyToRealmOrUpdate(preference);
         realm.commitTransaction();
         adapter.notifyItemChanged(adapterPosition);
     }
 
+    private void uncheckCurrentlyCheckedNotification() {
+        StationPreference previousStation = realm.where(StationPreference.class).equalTo("notificationEnabled", true).findFirst();
+        if (previousStation != null) {
+            realm.beginTransaction();
+            previousStation.setNotificationEnabled(false);
+            adapter.notifyItemChanged(previousStation);
+            realm.commitTransaction();
+        }
+    }
+
     @Override
     public void onChange() {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
-
-        if (sharedPreferences.getBoolean(Consts.PREF_UNHANDLED_REGISTRATION_ERROR, false)) {
-            // TODO: implement some sort of value clearing on error
-            // CheckBoxPreference cbp = (CheckBoxPreference)findPreference(getString(R.string.preferences_notification_key));
-            // cbp.setChecked(sharedPreferences.getBoolean(keyNotification, false));
-            return;
-        }
-
         StationPreference stationToNotify = firstOrNull(stations, s -> s.isNotificationEnabled());
         if (stationToNotify != null && checkPlayServices(true)) {
             String[] times = {"8:00", "8:15", "8:30", "8:45", "9:00", "10:45"}; // TODO
             GcmRegistrationIntentService.requestRegistration(getActivity(), stationToNotify.getStationId(), times);
             toolbarLoadingIndicator.setVisibility(View.VISIBLE);
-        } else if (sharedPreferences.getBoolean(Consts.PREF_POSSIBLY_REGISTERED, false) && checkPlayServices(false)) {
+        } else if (PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean(Consts.PREF_POSSIBLY_REGISTERED, false) && checkPlayServices(false)) {
             GcmRegistrationIntentService.requestDeregistration(getActivity());
             toolbarLoadingIndicator.setVisibility(View.VISIBLE);
         }
@@ -168,5 +169,12 @@ public class PreferencesFragment extends Fragment implements StationPreferenceAd
             return false;
         }
         return true;
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (key.equals(Consts.PREF_UNHANDLED_REGISTRATION_ERROR) && sharedPreferences.getBoolean(Consts.PREF_UNHANDLED_REGISTRATION_ERROR, false)) {
+            uncheckCurrentlyCheckedNotification();
+        }
     }
 }
