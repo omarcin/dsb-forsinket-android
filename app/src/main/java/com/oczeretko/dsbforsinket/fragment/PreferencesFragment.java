@@ -25,10 +25,11 @@ import io.realm.*;
 
 import static com.oczeretko.dsbforsinket.utils.CollectionsUtils.*;
 
-public class PreferencesFragment extends Fragment implements StationPreferenceAdapter.Listener, RealmChangeListener, SharedPreferences.OnSharedPreferenceChangeListener {
+public class PreferencesFragment extends Fragment
+    implements StationPreferenceAdapter.Listener, SharedPreferences.OnSharedPreferenceChangeListener {
 
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
-    private static final String TAG = "SettingsFragment";
+    private static final String TAG = "PreferencesFragment";
 
     private static final String TAG_STATION_PICKER = "STATIONS";
     private RecyclerView recycler;
@@ -64,7 +65,6 @@ public class PreferencesFragment extends Fragment implements StationPreferenceAd
         super.onStart();
         realm = Realm.getInstance(getContext());
         stations = realm.where(StationPreference.class).findAllSorted("id");
-        stations.addChangeListener(this);
         adapter = new StationPreferenceAdapter(getContext());
         adapter.setStations(stations);
         adapter.setListener(this);
@@ -78,7 +78,7 @@ public class PreferencesFragment extends Fragment implements StationPreferenceAd
         super.onStop();
         recycler.setAdapter(null);
         adapter = null;
-        stations.removeChangeListener(this);
+        stations = null;
         realm.close();
         PreferenceManager.getDefaultSharedPreferences(getContext())
                          .unregisterOnSharedPreferenceChangeListener(this);
@@ -113,14 +113,21 @@ public class PreferencesFragment extends Fragment implements StationPreferenceAd
 
     @Override
     public void onDeleteClick(int adapterPosition, StationPreference preference) {
+        boolean updateRegistrations = preference.isNotificationEnabled();
         realm.beginTransaction();
         preference.removeFromRealm();
         realm.commitTransaction();
         adapter.notifyItemRemoved(adapterPosition);
+
+        if (updateRegistrations) {
+            updateRegistrations();
+        }
     }
 
     @Override
     public void onNotificationChange(int adapterPosition, StationPreference preference, boolean isEnabled) {
+
+        Log.d(TAG, "onNotificationChange");
 
         if (isEnabled) {
             uncheckCurrentlyCheckedNotification();
@@ -131,9 +138,20 @@ public class PreferencesFragment extends Fragment implements StationPreferenceAd
         realm.copyToRealmOrUpdate(preference);
         realm.commitTransaction();
         adapter.notifyItemChanged(adapterPosition);
+
+        updateRegistrations();
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (key.equals(Consts.PREF_UNHANDLED_REGISTRATION_ERROR) && sharedPreferences.getBoolean(Consts.PREF_UNHANDLED_REGISTRATION_ERROR, false)) {
+            Log.d(TAG, "onSharedPrefChange");
+            uncheckCurrentlyCheckedNotification();
+        }
     }
 
     private void uncheckCurrentlyCheckedNotification() {
+        Log.d(TAG, "uncheckCurrentlyCheckedNotification");
         StationPreference previousStation = realm.where(StationPreference.class).equalTo("notificationEnabled", true).findFirst();
         if (previousStation != null) {
             realm.beginTransaction();
@@ -143,8 +161,8 @@ public class PreferencesFragment extends Fragment implements StationPreferenceAd
         }
     }
 
-    @Override
-    public void onChange() {
+    private void updateRegistrations() {
+        Log.d(TAG, "updateRegistrations");
         StationPreference stationToNotify = firstOrNull(stations, s -> s.isNotificationEnabled());
         if (stationToNotify != null && checkPlayServices(true)) {
             String[] times = {"8:00", "8:15", "8:30", "8:45", "9:00", "10:45"}; // TODO
@@ -169,12 +187,5 @@ public class PreferencesFragment extends Fragment implements StationPreferenceAd
             return false;
         }
         return true;
-    }
-
-    @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (key.equals(Consts.PREF_UNHANDLED_REGISTRATION_ERROR) && sharedPreferences.getBoolean(Consts.PREF_UNHANDLED_REGISTRATION_ERROR, false)) {
-            uncheckCurrentlyCheckedNotification();
-        }
     }
 }

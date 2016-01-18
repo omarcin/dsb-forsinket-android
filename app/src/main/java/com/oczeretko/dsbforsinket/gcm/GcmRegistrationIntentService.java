@@ -62,6 +62,7 @@ public class GcmRegistrationIntentService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
         int action = intent.getIntExtra(KEY_ACTION, ACTION_DEREGISTER);
+        Log.d(TAG, "onHandleIntent: " + action);
 
         if (action == ACTION_ERROR) {
             handleRegistrationError();
