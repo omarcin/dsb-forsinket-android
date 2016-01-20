@@ -77,4 +77,14 @@ public final class CollectionsUtils {
         return -1;
     }
 
+    public static int indexOf(String[] array, String element) {
+        int len = array.length;
+        for (int i = 0; i < len; i++) {
+            if (element.equals(array[i])) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
 }

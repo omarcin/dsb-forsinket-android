@@ -32,6 +32,8 @@ public class PreferencesFragment extends Fragment
     private static final String TAG = "PreferencesFragment";
 
     private static final String TAG_STATION_PICKER = "STATIONS";
+    private static final String TAG_TIME_PICKER = "TIMES";
+
     private RecyclerView recycler;
     private FloatingActionButton addButton;
     private Realm realm;
@@ -92,9 +94,8 @@ public class PreferencesFragment extends Fragment
     }
 
     private void onAddClick(View view) {
-        StationPickerFragment picker = new StationPickerFragment();
-        picker.setListener(this::addStation);
-        picker.show(getChildFragmentManager(), TAG_STATION_PICKER);
+        StationPickerFragment.newInstance(this::addStation)
+                             .show(getChildFragmentManager(), TAG_STATION_PICKER);
     }
 
     private void addStation(String stationId) {
@@ -105,6 +106,7 @@ public class PreferencesFragment extends Fragment
         preference.setId(newId);
         preference.setName(Stations.getStationNameById(getContext(), stationId));
         preference.setStationId(stationId);
+        preference.setTimes(Times.getDefault(getContext()));
         realm.commitTransaction();
 
         adapter.notifyItemInserted(adapter.getItemCount() - 1);
@@ -143,6 +145,21 @@ public class PreferencesFragment extends Fragment
     }
 
     @Override
+    public void onTimesClick(int adapterPosition, StationPreference preference) {
+        TimePickerFragment.newInstance(this::onTimesPicked, preference.getId(), preference.getTimes())
+                          .show(getChildFragmentManager(), TAG_TIME_PICKER);
+    }
+
+    private void onTimesPicked(int stationId, String[] times) {
+        realm.beginTransaction();
+        StationPreference stationPreference = realm.where(StationPreference.class).equalTo("id", stationId).findFirst();
+        stationPreference.setTimes(times);
+        realm.commitTransaction();
+        adapter.notifyItemChanged(stationPreference);
+        updateRegistrations();
+    }
+
+    @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals(Consts.PREF_UNHANDLED_REGISTRATION_ERROR) && sharedPreferences.getBoolean(Consts.PREF_UNHANDLED_REGISTRATION_ERROR, false)) {
             Log.d(TAG, "onSharedPrefChange");
@@ -164,8 +181,8 @@ public class PreferencesFragment extends Fragment
     private void updateRegistrations() {
         Log.d(TAG, "updateRegistrations");
         StationPreference stationToNotify = firstOrNull(stations, s -> s.isNotificationEnabled());
-        if (stationToNotify != null && checkPlayServices(true)) {
-            String[] times = {"8:00", "8:15", "8:30", "8:45", "9:00", "10:45"}; // TODO
+        String[] times = stationToNotify == null ? null : stationToNotify.getTimes();
+        if (times != null && times.length > 0 && checkPlayServices(true)) {
             GcmRegistrationIntentService.requestRegistration(getActivity(), stationToNotify.getStationId(), times);
             toolbarLoadingIndicator.setVisibility(View.VISIBLE);
         } else if (PreferenceManager.getDefaultSharedPreferences(getContext()).getBoolean(Consts.PREF_POSSIBLY_REGISTERED, false) && checkPlayServices(false)) {

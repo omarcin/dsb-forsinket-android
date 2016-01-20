@@ -21,6 +21,12 @@ public class StationPickerFragment extends DialogFragment {
     private Listener listener;
     private Adapter adapter;
 
+    public static StationPickerFragment newInstance(Listener listener){
+        StationPickerFragment fragment = new StationPickerFragment();
+        fragment.setListener(listener);
+        return fragment;
+    }
+
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {

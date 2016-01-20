@@ -7,7 +7,6 @@ import android.os.*;
 import android.support.v4.content.*;
 import android.support.v4.view.*;
 import android.support.v7.widget.*;
-import android.text.*;
 import android.view.*;
 import android.view.animation.*;
 import android.widget.*;
@@ -18,6 +17,7 @@ import com.oczeretko.dsbforsinket.utils.*;
 
 import java.util.*;
 
+import static com.oczeretko.dsbforsinket.utils.CollectionsUtils.*;
 import static com.oczeretko.dsbforsinket.utils.ViewUtils.*;
 
 public class StationPreferenceAdapter extends RecyclerView.Adapter<StationPreferenceAdapter.ViewHolder> {
@@ -28,6 +28,7 @@ public class StationPreferenceAdapter extends RecyclerView.Adapter<StationPrefer
     private final int animationDuration;
     private final int expandedElevation;
     private final Resources resources;
+    private final Context context;
 
     private Listener listener;
     private int expandedId;
@@ -37,6 +38,7 @@ public class StationPreferenceAdapter extends RecyclerView.Adapter<StationPrefer
     private float collapseDeceleration;
 
     public StationPreferenceAdapter(Context context) {
+        this.context = context;
         resources = context.getResources();
         animationDuration = resources.getInteger(R.integer.animation_duration_expand);
         expandedElevation = resources.getInteger(R.integer.elevation_item);
@@ -68,11 +70,8 @@ public class StationPreferenceAdapter extends RecyclerView.Adapter<StationPrefer
         holder.delete.setTag(TAG_HOLDER, holder);
         holder.delete.setOnClickListener(this::onDeleteClick);
 
-        String timeHtml = resources.getString(R.string.fragment_preferences_item_times, "7:15", "11:30");
-        holder.notificationTimes.setText(Html.fromHtml(timeHtml));
         if (holder.preference.isNotificationEnabled()) {
-            String statusString = resources.getString(R.string.status_notification_enabled, "7:15", "11:30");
-            holder.status.setText(Html.fromHtml(statusString));
+            holder.status.setText("TODO CHANGE ME");
         } else {
             holder.status.setText(R.string.status_notification_disabled);
         }
@@ -82,11 +81,34 @@ public class StationPreferenceAdapter extends RecyclerView.Adapter<StationPrefer
         holder.notifications.setTag(TAG_HOLDER, holder);
         holder.notifications.setOnCheckedChangeListener(this::onNotificationCheckedChange);
 
+        holder.notificationTimes.setTag(TAG_HOLDER, holder);
+        holder.notificationTimes.setOnClickListener(this::onTimesClick);
+
+        if (holder.preference.isNotificationEnabled()) {
+            if (holder.preference.getTimes().length == 0) {
+                holder.notificationTimes.setText("Set the times");
+            } else {
+                List<String> strings = map(Arrays.asList(holder.preference.getTimes()), v -> Times.getNameByValue(context, v));
+                holder.notificationTimes.setText(StringUtils.join(" ", strings));
+            }
+            holder.notificationTimes.setVisibility(View.VISIBLE);
+        } else {
+            holder.notificationTimes.setVisibility(View.GONE);
+        }
+
         boolean isItemExpanded = isExpanded(holder.preference);
         bindExpandedLayout(holder, isItemExpanded);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             holder.itemView.setElevation(isItemExpanded ? expandedElevation : 0);
+        }
+    }
+
+    private void onTimesClick(View view) {
+        ViewHolder holder = (ViewHolder)view.getTag(TAG_HOLDER);
+        if (listener != null) {
+            int position = findCurrentAdapterPosition(holder.preference);
+            listener.onTimesClick(position, holder.preference);
         }
     }
 
@@ -142,8 +164,8 @@ public class StationPreferenceAdapter extends RecyclerView.Adapter<StationPrefer
         }
     }
 
-    public void notifyItemChanged(StationPreference previousStation) {
-        notifyItemChanged(findCurrentAdapterPosition(previousStation));
+    public void notifyItemChanged(StationPreference station) {
+        notifyItemChanged(findCurrentAdapterPosition(station));
     }
 
     private int findCurrentAdapterPosition(StationPreference preference) {
@@ -284,5 +306,7 @@ public class StationPreferenceAdapter extends RecyclerView.Adapter<StationPrefer
         void onDeleteClick(int adapterPosition, StationPreference preference);
 
         void onNotificationChange(int adapterPosition, StationPreference preference, boolean isEnabled);
+
+        void onTimesClick(int adapterPosition, StationPreference preference);
     }
 }

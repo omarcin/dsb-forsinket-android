@@ -33,6 +33,7 @@ public final class Stations {
                 preference.setId(id++);
                 preference.setName(Stations.getStationNameById(context, stationId));
                 preference.setStationId(stationId);
+                preference.setTimes(Times.getDefault(context));
             }
             realm.commitTransaction();
         }
