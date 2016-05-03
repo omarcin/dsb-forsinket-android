@@ -46,7 +46,7 @@ public class GcmMessageListenerService extends GcmListenerService {
     private void sendNotification(PushMessage message) {
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(  this,
+        PendingIntent pendingIntent = PendingIntent.getActivity(this,
                                                                 0 /* Request code */,
                                                                 intent,
                                                                 PendingIntent.FLAG_ONE_SHOT);
@@ -57,9 +57,9 @@ public class GcmMessageListenerService extends GcmListenerService {
 
         String delimiter = getString(R.string.notification_delay_content_delimiter);
         List<String> namesTimes = CollectionsUtils.map(message.delays,
-                                                d -> d.departureTime.isEmpty()
-                                                         ? getString(R.string.notification_delay_content_format_no_time, d.departureName)
-                                                         : getString(R.string.notification_delay_content_format, d.departureName, d.departureTime));
+                                                       d -> d.departureTime.isEmpty()
+                                                                ? getString(R.string.notification_delay_content_format_no_time, d.departureName)
+                                                                : getString(R.string.notification_delay_content_format, d.departureName, d.departureTime));
         String content = StringUtils.join(delimiter, namesTimes);
 
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
@@ -84,15 +84,14 @@ public class GcmMessageListenerService extends GcmListenerService {
 
         for (PushMessage.DelayInfo delay : message.delays) {
 
-            String line =
-                delay.departureTime.isEmpty()
-                    ? getString(R.string.notification_delay_line_format_no_time,
-                                delay.departureName,
-                                delay.departureDelay)
-                    : getString(R.string.notification_delay_line_format,
-                                delay.departureName,
-                                delay.departureTime,
-                                delay.departureDelay);
+            String line = delay.isCancelled
+                              ? getString(R.string.notification_delay_line_format_cancelled,
+                                          delay.departureName,
+                                          delay.departureTime)
+                              : getString(R.string.notification_delay_line_format,
+                                          delay.departureName,
+                                          delay.departureTime,
+                                          delay.departureNewTime);
             inboxStyle.addLine(Html.fromHtml(line));
         }
 
@@ -118,12 +117,14 @@ public class GcmMessageListenerService extends GcmListenerService {
         private static class DelayInfo {
             final public String departureName;
             final public String departureTime;
-            final public String departureDelay;
+            final public String departureNewTime;
+            final public boolean isCancelled;
 
-            private DelayInfo(String departureName, String departureTime, String departureDelay) {
+            private DelayInfo(String departureName, String departureTime, String departureNewTime, boolean isCancelled) {
                 this.departureName = departureName;
                 this.departureTime = departureTime;
-                this.departureDelay = departureDelay;
+                this.departureNewTime = departureNewTime;
+                this.isCancelled = isCancelled;
             }
         }
 
@@ -135,8 +136,9 @@ public class GcmMessageListenerService extends GcmListenerService {
             while (bundle.getString("departureName" + lineNumber) != null && lineNumber < MAX_LINES) {
                 String departureName = bundle.getString("departureName" + lineNumber);
                 String departureTime = bundle.getString("departureTime" + lineNumber);
-                String departureDelay = bundle.getString("departureDelay" + lineNumber);
-                delays.add(new DelayInfo(departureName, departureTime, departureDelay));
+                String departureNewTime = bundle.getString("departureNewTime" + lineNumber);
+                boolean isCancelled = bundle.getBoolean("departureCancelled" + lineNumber);
+                delays.add(new DelayInfo(departureName, departureTime, departureNewTime, isCancelled));
                 lineNumber++;
             }
 
