@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="list_item_linename_text">
+        <item name="android:textSize">@dimen/font_size_departures_smaller</item>
+        <item name="android:textAlignment">center</item>
+    </style>
+</resources>

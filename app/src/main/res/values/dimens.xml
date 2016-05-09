@@ -15,10 +15,19 @@
 
     <dimen name="radius">8dp</dimen>
 
-    <dimen name="font_size_departures">22sp</dimen>
+    <dimen name="font_size_departures">20sp</dimen>
+    <dimen name="font_size_departures_smaller">18sp</dimen>
     <dimen name="font_size_preferences_stations">32sp</dimen>
     <dimen name="font_size_preferences_settings">20sp</dimen>
     <dimen name="font_size_small">16sp</dimen>
     <dimen name="font_size_tiny">12sp</dimen>
+
+    <dimen name="border_big">4dp</dimen>
+    <dimen name="border_medium">2dp</dimen>
+    <dimen name="border_small">1dp</dimen>
+
+    <dimen name="border_line_strain">0dp</dimen>
+    <dimen name="border_line_metro">1dp</dimen>
+    <dimen name="border_line_train">0dp</dimen>
 
 </resources>

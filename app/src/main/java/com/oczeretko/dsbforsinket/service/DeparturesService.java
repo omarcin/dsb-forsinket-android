@@ -7,6 +7,7 @@ import android.util.*;
 
 import com.oczeretko.dsbforsinket.data.*;
 import com.squareup.okhttp.*;
+import com.squareup.okhttp.Response;
 
 import org.xml.sax.*;
 
@@ -15,6 +16,10 @@ import java.text.*;
 import java.util.*;
 
 import javax.xml.parsers.*;
+
+import retrofit2.*;
+import retrofit2.Call;
+import retrofit2.converter.gson.*;
 
 public class DeparturesService extends IntentService {
 
@@ -26,10 +31,17 @@ public class DeparturesService extends IntentService {
     private final static String KEY_RECEIVER = "ResultReceiver";
     private final static String KEY_STATION = "Station";
     private final OkHttpClient httpClient;
+    private final RejseplannenApi rejseplannenApi;
+
 
     public DeparturesService() {
         super(TAG);
         httpClient = new OkHttpClient();
+        Retrofit retrofit = new Retrofit.Builder()
+            .baseUrl(RejseplannenApi.BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build();
+        rejseplannenApi = retrofit.create(RejseplannenApi.class);
     }
 
     public static void requestData(Context context, ResultReceiver resultReceiver, String station) {
@@ -47,8 +59,8 @@ public class DeparturesService extends IntentService {
 
         try {
 
-            ArrayList<DepartureInfo> departures = fetchDepartures(station);
-            Collections.sort(departures, (a, b) -> a.getDepartureTime().compareTo(b.getDepartureTime()));
+            ArrayList<Departure> departures = fetchDepartures(station);
+            Collections.sort(departures, (a, b) -> (a.getDate() + a.getTime()).compareTo(b.getDate() + b.getTime()));
             Bundle data = new Bundle();
             data.putParcelableArrayList(KEY_RESULT, departures);
             resultReceiver.send(RESULT_OK, data);
@@ -60,15 +72,16 @@ public class DeparturesService extends IntentService {
         }
     }
 
-    public ArrayList<DepartureInfo> fetchDepartures(String station) throws IOException, ParseException, SAXException, ParserConfigurationException {
+    public ArrayList<Departure> fetchDepartures(String station) throws Exception {
 
-        String url = "http://traindata.dsb.dk/stationdeparture/opendataprotocol.svc/Queue()?%24filter=StationUic+eq+%27" + station + "%27";
-        Request request = new Request.Builder()
-                              .url(url)
-                              .build();
-
-        Response response = httpClient.newCall(request).execute();
-        InputStream responseStream = response.body().byteStream();
-        return new DeparturesParser().parseDepartures(responseStream);
+        Call<DepartureResult> departuresCall = rejseplannenApi.getDepartures(station);
+        retrofit2.Response<DepartureResult> response = departuresCall.execute();
+        if(!response.isSuccessful()){
+            Log.e(TAG, response.errorBody().string());
+            throw new Exception(response.message());
+        }
+        else {
+            return response.body().getDepartureBoard().getDepartures();
+        }
     }
 }

@@ -57,10 +57,11 @@ public class GcmMessageListenerService extends GcmListenerService {
 
         String delimiter = getString(R.string.notification_delay_content_delimiter);
         List<String> namesTimes = CollectionsUtils.map(message.delays,
-                                                       d -> d.departureTime.isEmpty()
-                                                                ? getString(R.string.notification_delay_content_format_no_time, d.departureName)
-                                                                : getString(R.string.notification_delay_content_format, d.departureName, d.departureTime));
+                                                       d -> d.isCancelled
+                                                                ? getString(R.string.notification_delay_content_format_cancelled, d.departureName, d.departureTime)
+                                                                : getString(R.string.notification_delay_content_format, d.departureName, d.departureTime, d.departureNewTime));
         String content = StringUtils.join(delimiter, namesTimes);
+        Spanned contentHtml = Html.fromHtml(content);
 
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder =
@@ -70,7 +71,7 @@ public class GcmMessageListenerService extends GcmListenerService {
                 .setPriority(Notification.PRIORITY_HIGH)
                 .setSmallIcon(getNotificationIcon())
                 .setContentTitle(title)
-                .setContentText(content)
+                .setContentText(contentHtml)
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)
                 .setColor(ContextCompat.getColor(this, R.color.colorAccent))
@@ -137,7 +138,7 @@ public class GcmMessageListenerService extends GcmListenerService {
                 String departureName = bundle.getString("departureName" + lineNumber);
                 String departureTime = bundle.getString("departureTime" + lineNumber);
                 String departureNewTime = bundle.getString("departureNewTime" + lineNumber);
-                boolean isCancelled = bundle.getBoolean("departureCancelled" + lineNumber);
+                boolean isCancelled = Boolean.parseBoolean(bundle.getString("departureCancelled" + lineNumber));
                 delays.add(new DelayInfo(departureName, departureTime, departureNewTime, isCancelled));
                 lineNumber++;
             }

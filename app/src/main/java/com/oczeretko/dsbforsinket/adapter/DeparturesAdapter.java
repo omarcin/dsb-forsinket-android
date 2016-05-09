@@ -8,6 +8,7 @@ import android.widget.*;
 
 import com.oczeretko.dsbforsinket.*;
 import com.oczeretko.dsbforsinket.data.*;
+import com.oczeretko.dsbforsinket.service.*;
 
 import java.util.*;
 
@@ -22,19 +23,21 @@ public class DeparturesAdapter extends RecyclerView.Adapter<DeparturesAdapter.Vi
         LINE_TO_BACKGROUND.put("E", R.drawable.line_e);
         LINE_TO_BACKGROUND.put("F", R.drawable.line_f);
         LINE_TO_BACKGROUND.put("H", R.drawable.line_h);
+        LINE_TO_BACKGROUND.put("M1", R.drawable.line_metro1);
+        LINE_TO_BACKGROUND.put("M2", R.drawable.line_metro2);
         LINE_TO_BACKGROUND.put("", R.drawable.line_train);
     }
 
     private static final int LAYOUT_RESOURCE = R.layout.fragment_departures_item;
     private final Context context;
-    private final List<DepartureInfo> departures;
+    private final List<Departure> departures;
 
     public DeparturesAdapter(Context context) {
         this.context = context;
         this.departures = new ArrayList<>();
     }
 
-    public void setDepartures(List<DepartureInfo> departures) {
+    public void setDepartures(List<Departure> departures) {
         this.departures.clear();
         this.departures.addAll(departures);
         notifyDataSetChanged();
@@ -48,11 +51,11 @@ public class DeparturesAdapter extends RecyclerView.Adapter<DeparturesAdapter.Vi
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        DepartureInfo departureInfo = this.departures.get(position);
-        holder.destinationName.setText(departureInfo.getDestinationName());
-        holder.departureTime.setText(departureInfo.getDepartureTime());
-        holder.strikeThrough.setVisibility(departureInfo.isCancelled() ? View.VISIBLE : View.INVISIBLE);
-        holder.delay.setText(departureInfo.getDelay());
+        Departure departure = this.departures.get(position);
+        holder.destinationName.setText(departure.getDirection());
+        holder.departureTime.setText(departure.getTime());
+        holder.strikeThrough.setVisibility(departure.isCancelled() ? View.VISIBLE : View.INVISIBLE);
+        holder.updatedTime.setText(departure.getUpdatedTime());
 
         if (position % 2 == 1) {
             holder.itemView.setBackgroundColor(ContextCompat.getColor(context, R.color.colorOddRow));
@@ -60,7 +63,7 @@ public class DeparturesAdapter extends RecyclerView.Adapter<DeparturesAdapter.Vi
             holder.itemView.setBackgroundColor(0);
         }
 
-        String trainLineUpper = departureInfo.getTrainLine().toUpperCase();
+        String trainLineUpper = departure.getLineName().toUpperCase();
         holder.lineName.setText(trainLineUpper);
 
         if (LINE_TO_BACKGROUND.containsKey(trainLineUpper)) {
@@ -80,7 +83,7 @@ public class DeparturesAdapter extends RecyclerView.Adapter<DeparturesAdapter.Vi
         protected final TextView destinationName;
         protected final TextView departureTime;
         protected final View strikeThrough;
-        protected final TextView delay;
+        protected final TextView updatedTime;
         protected final TextView lineName;
         private final View lineBackgroundView;
 
@@ -91,7 +94,7 @@ public class DeparturesAdapter extends RecyclerView.Adapter<DeparturesAdapter.Vi
             destinationName = (TextView)itemView.findViewById(R.id.trainDestination);
             departureTime = (TextView)itemView.findViewById(R.id.departureTime);
             strikeThrough = itemView.findViewById(R.id.line);
-            delay = (TextView)itemView.findViewById(R.id.delay);
+            updatedTime = (TextView)itemView.findViewById(R.id.updatedTime);
         }
     }
 }

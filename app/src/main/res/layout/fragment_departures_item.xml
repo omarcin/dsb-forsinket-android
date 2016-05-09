@@ -20,24 +20,14 @@
         >
         <TextView
             android:id="@+id/trainLine"
-            style="@style/list_item_text"
+            style="@style/list_item_linename_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="A"
+            android:text="M1"
             />
 
     </com.oczeretko.dsbforsinket.view.SquareLayout>
-
-    <TextView
-        android:id="@+id/trainDestination"
-        style="@style/list_item_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_toRightOf="@+id/trainLineLayout"
-        android:layout_toEndOf="@+id/trainLineLayout"
-        android:text="name">
-    </TextView>
 
     <TextView
         android:id="@+id/departureTime"
@@ -50,7 +40,7 @@
     </TextView>
 
     <TextView
-        android:id="@+id/delay"
+        android:id="@+id/updatedTime"
         style="@style/list_item_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -62,11 +52,28 @@
     </TextView>
 
     <TextView
+        android:id="@+id/trainDestination"
+        style="@style/list_item_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/trainLineLayout"
+        android:layout_toEndOf="@+id/trainLineLayout"
+        android:layout_toLeftOf="@id/updatedTime"
+        android:layout_toStartOf="@id/updatedTime"
+        android:layout_marginRight="@dimen/margin_small"
+        android:layout_marginEnd="@dimen/margin_small"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:singleLine="true"
+        android:text="Kobenhavns Lufthavn Station">
+    </TextView>
+
+    <TextView
         android:id="@+id/line"
         android:layout_width="fill_parent"
         android:layout_height="2dp"
         android:layout_centerVertical="true"
-        android:background="@color/colorPrimaryDark">
+        android:background="@color/colorAccent">
     </TextView>
 
 </RelativeLayout>

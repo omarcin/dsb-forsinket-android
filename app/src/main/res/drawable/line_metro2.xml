@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
        android:shape="rectangle">
-    <solid android:color="@color/line_train"/>
+    <solid android:color="@color/line_metro2"/>
     <corners android:radius="@dimen/radius"/>
-    <stroke android:width="@dimen/border_line_train" android:color="@color/line_train_border"/>
+    <stroke android:width="@dimen/border_line_metro" android:color="@color/line_metro2_border"/>
 </shape>

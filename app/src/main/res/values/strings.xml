@@ -33,8 +33,8 @@
     <string name="notification_delay_line_format">&lt;b&gt;%1$s&lt;/b&gt; (%2$s): &lt;b&gt;%3$s&lt;/b&gt;</string>
     <string name="notification_delay_line_format_cancelled">&lt;b&gt;%1$s&lt;/b&gt; (%2$s): &lt;b&gt;Cancelled&lt;/b&gt;</string>
     <string name="notification_delay_content_delimiter">,\u0020</string>
-    <string name="notification_delay_content_format_no_time">%1$s</string>
-    <string name="notification_delay_content_format">%1$s (%2$s)</string>
+    <string name="notification_delay_content_format_cancelled">%1$s %2$s &lt;b&gt;Cancelled&lt;/b&gt;</string>
+    <string name="notification_delay_content_format">%1$s %2$s &lt;b&gt;%3$s&lt;/b&gt;</string>
 
     <string name="snackbar_first_visit">Go to Settings to setup stations and notifications.</string>
     <string name="snackbar_first_visit_action_settings">Settings</string>

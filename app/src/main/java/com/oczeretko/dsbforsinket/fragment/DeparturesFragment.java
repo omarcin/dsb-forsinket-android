@@ -36,7 +36,7 @@ public class DeparturesFragment extends Fragment implements ResultReceiverListen
 
     private String station;
     private long departuresTimestamp;
-    private ArrayList<DepartureInfo> departures;
+    private ArrayList<Departure> departures;
 
     private Handler refreshHandler = new Handler(toHandlerCallback(this::refreshData));
 
@@ -114,7 +114,7 @@ public class DeparturesFragment extends Fragment implements ResultReceiverListen
         Log.d(TAG, "received result");
         switch (resultCode) {
             case DeparturesService.RESULT_OK:
-                ArrayList<DepartureInfo> receivedDepartures = resultData.getParcelableArrayList(DeparturesService.KEY_RESULT);
+                ArrayList<Departure> receivedDepartures = resultData.getParcelableArrayList(DeparturesService.KEY_RESULT);
                 departuresTimestamp = System.currentTimeMillis();
                 setData(receivedDepartures);
                 scheduleRefresh();
@@ -149,7 +149,7 @@ public class DeparturesFragment extends Fragment implements ResultReceiverListen
         }
     }
 
-    private void setData(ArrayList<DepartureInfo> departures) {
+    private void setData(ArrayList<Departure> departures) {
         this.departures = departures;
         adapter.setDepartures(departures);
         recyclerView.setVisibility(View.VISIBLE);

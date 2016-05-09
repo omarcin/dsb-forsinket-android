@@ -29,6 +29,10 @@
         <item name="android:textSize">@dimen/font_size_departures</item>
     </style>
 
+    <style name="list_item_linename_text">
+        <item name="android:textSize">@dimen/font_size_departures_smaller</item>
+    </style>
+
     <style name="list_item_text_light" parent="list_item_text">
         <item name="android:textColor">@color/primary_text_default_material_dark</item>
     </style>

@@ -40,15 +40,15 @@ public class DeparturesCache {
         }
     }
 
-    public void put(String station, ArrayList<DepartureInfo> departures) {
+    public void put(String station, ArrayList<Departure> departures) {
         cache.put(station, new CachedDepartures(System.currentTimeMillis(), departures));
     }
 
     public static class CachedDepartures {
         private final long timestamp;
-        private final ArrayList<DepartureInfo> departures;
+        private final ArrayList<Departure> departures;
 
-        public CachedDepartures(long timestamp, ArrayList<DepartureInfo> departures) {
+        public CachedDepartures(long timestamp, ArrayList<Departure> departures) {
             this.timestamp = timestamp;
             this.departures = departures;
         }
@@ -57,7 +57,7 @@ public class DeparturesCache {
             return timestamp;
         }
 
-        public ArrayList<DepartureInfo> getDepartures() {
+        public ArrayList<Departure> getDepartures() {
             return departures;
         }
     }

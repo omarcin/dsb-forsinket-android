@@ -9,13 +9,24 @@
 
     <color name="white">#FFFFFF</color>
 
-
     <color name="line_a">#7700B6E3</color>
     <color name="line_b">#773CB94E</color>
     <color name="line_c">#77FC873D</color>
     <color name="line_e">#778170A1</color>
     <color name="line_f">#77FFC142</color>
     <color name="line_h">#77FB002B</color>
-    <color name="line_train">#BBBBBB</color>
+    <color name="line_train">#AACCCCCC</color>
+    <color name="line_metro1">#66007C59</color>
+    <color name="line_metro2">#66FFC400</color>
+
+    <color name="line_a_border">#7700B6E3</color>
+    <color name="line_b_border">#773CB94E</color>
+    <color name="line_c_border">#77FC873D</color>
+    <color name="line_e_border">#778170A1</color>
+    <color name="line_f_border">#77FFC142</color>
+    <color name="line_h_border">#77FB002B</color>
+    <color name="line_train_border">#AA777777</color>
+    <color name="line_metro1_border">#AA007C59</color>
+    <color name="line_metro2_border">#AAFFC400</color>
 
 </resources>
