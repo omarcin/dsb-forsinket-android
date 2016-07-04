@@ -1,10 +1,12 @@
-TODO: some description
+Android application which allows the user to subscribe to push notifications about delays in public transportation and quickly check the departures board of selected stations.
+
+The app uses [Rejseplannen's API](http://rejseplannen.dk) to get the information about the departures and delays.
+Azure Notification Hub is used for sending push notifications.
+The back-end responsible for periodicaly checking the traffic information and sending notifications when needed is available in my [dsb-forsinket-akka](https://github.com/omarcin/dsb-forsinket-akka) repository.
 
 ![Main screen](meta/screenshot1.png?raw=true "Main screen")
 ![Menu](meta/screenshot2.png?raw=true "Menu")
 ![Settings](meta/screenshot3.png?raw=true "Settings")
-
-
 
 Material icons under the [CC-BY](https://creativecommons.org/licenses/by/4.0/) license.
 
